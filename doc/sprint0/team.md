@@ -1,7 +1,7 @@
 | Full Name      | Section | Student ID  | Email                | Best Way to Contact | Discord Username |
 |----------------|---------|-------------|----------------------|---------------------|------------------|
 | Zack Nayar     | B     | 220373643  | nayarr54@my.yorku.ca |     Email              | zn18_ |
-| Alp Duras      | B     | 100xxxxxxx  | teammate1@my.yorku.ca| (phone/WhatsApp/etc)| teammate1#0000   |
+| Alp Duras      | B     | 220603346  | alpduras@my.yorku.ca |     Email              |._alp_.|
 |  Sahil Panchal | B     | 100xxxxxxx  | teammate2@my.yorku.ca| (phone/WhatsApp/etc)| teammate2#0000   |
 |  Arsh Dhothar | B     | 220614129  | arsh05@my.yorku.ca|         Email            | blu2___  |
 | Ibrahim Khalil| B    | 100xxxxxxx  | teammate4@my.yorku.ca| (phone/WhatsApp/etc)| teammate4#0000   |
