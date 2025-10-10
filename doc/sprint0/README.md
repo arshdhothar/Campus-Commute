@@ -6,10 +6,10 @@ Affordability: Students and staff often have to face high commuting costs when t
 Sustainability: CampusCommute ride sharing helps reduce traffic and carbon footprint as it promotes the use of carpooling.
 
 To solve these problems in an efficient way CampusCommute allows user to:
-Offer or request rides within their campus community.
-Communicate securely through in-app messaging. 
-Track trips, receive notifications, and view driver ratings.
-Promote sustainability
+- Offer or request rides within their campus community.
+- Communicate securely through in-app messaging. 
+- Track trips, receive notifications, and view driver ratings.
+- Promote sustainability
 
 The goal of CampusCommute is to build trust and offer convenience for members within the campus through a simple and reliable ride sharing experience.
 
