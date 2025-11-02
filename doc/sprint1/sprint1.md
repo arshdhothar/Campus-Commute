@@ -18,7 +18,7 @@ Zack Nayar | Product Owner | 12
 [Name 2] | Scrum Master | 14  
 [Name 3] | Developer | 15  
 [Name 4] | Developer | 12  
-[Name 5] | Developer | 14  
+Alp Duras | Developer | 14  
 
 The user stories we selected are User Story 1 : Ride Posting (Driver) where drivers can set route, number of seats, and departure time.
 User Story 2: Ride Request by Passenger where Passengers can search rides by location, time, or destination. Lastly User Story 20: User Signup/Login where there is a signup/login page for the student. 
