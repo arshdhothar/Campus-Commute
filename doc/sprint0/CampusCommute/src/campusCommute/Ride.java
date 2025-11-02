@@ -99,7 +99,7 @@ public class Ride {
 		
 		@Override
 		public String toString() {
-			return startLocation + "->" + destination + "@" + departureTime +
+			return startLocation + " -> " + destination + " @ " + departureTime +
 					" | Seats: " + availableSeats + " | $" + price;
 		}
 
