@@ -15,8 +15,8 @@ Develop the foundation of Campus Commute by implementing:
 Name | Role | Capacity (hrs)
 ------|------|---------------
 Zack Nayar | Product Owner | 12  
-[Arsh Dhothar] | Scrum Master | 14  
-[Name 3] | Developer | 15  
+Arsh Dhothar | Scrum Master | 14  
+Sahil Panchal | Developer | 15  
 [Name 4] | Developer | 12  
 Alp Duras | Developer | 14  
 
