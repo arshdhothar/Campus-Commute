@@ -23,6 +23,7 @@ public class Ride {
 			this.availableSeats = availableSeats;
 			this.price = price;
 			this.requests = new ArrayList<>();
+			
 		}
 
 		
@@ -99,7 +100,7 @@ public class Ride {
 		
 		@Override
 		public String toString() {
-			return startLocation + "->" + destination + "@" + departureTime +
+			return startLocation + " -> " + destination + " @ " + departureTime +
 					" | Seats: " + availableSeats + " | $" + price;
 		}
 
