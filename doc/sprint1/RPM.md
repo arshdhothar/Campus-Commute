@@ -2,7 +2,7 @@ Project: CampusCommute
 Date: October, 24, 2025
 
 Participants: 
-- Alp
+- Alp Duras
 - Arsh
 - Ibrahim
 - Sahil
@@ -70,7 +70,7 @@ Participants and Responsibilities:
 4. Ibrahim - Developer
 - Working on implementing the ride request user story alongside Zack using Java/Spring Boot.
 - Conducts testing for ride request related functionalities to ensure reliability.
-5. Alp - Developer
+5. Alp Duras- Developer
 - Working on implementing the login/sign up user story using Java/Spring boot.
 - Designs and develops the user interface for the CampusCommute app.
 - Conducts testing for login/sign up related functionalities to ensure reliability.
