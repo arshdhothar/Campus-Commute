@@ -15,7 +15,7 @@ Develop the foundation of Campus Commute by implementing:
 Name | Role | Capacity (hrs)
 ------|------|---------------
 Zack Nayar | Product Owner | 12  
-[Name 2] | Scrum Master | 14  
+[Arsh Dhothar] | Scrum Master | 14  
 [Name 3] | Developer | 15  
 [Name 4] | Developer | 12  
 Alp Duras | Developer | 14  
@@ -45,7 +45,7 @@ User Story 2: Ride Request by Passenger where Passengers can search rides by loc
 - Show a ride list table in the GUI  
 - Save and load rides from a file  
 
-**Carpool Matching((Sahil and Arsh)**
+**Carpool Matching(Sahil and Arsh)**
 - Write a method to check rides with similar start and end points  
 - Show suggested matches in the UI  
 
