@@ -23,6 +23,7 @@ public class Ride {
 			this.availableSeats = availableSeats;
 			this.price = price;
 			this.requests = new ArrayList<>();
+			
 		}
 
 		
