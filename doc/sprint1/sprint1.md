@@ -26,7 +26,7 @@ User Story 2: Ride Request by Passenger where Passengers can search rides by loc
 ---
 
 ## Spikes (Research Tasks)
-- Spike 1:  Find a safe way to save user login info 
+- Spike 1:  Find a simple way to save user login info 
 - Spike 2: Learn the best way to organize Swing code using MVC.  
 - Spike 3 : Try a simple match method that compares routes and times.  
 
