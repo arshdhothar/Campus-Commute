@@ -1,5 +1,8 @@
 package campusCommute;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class Ride {
 		private String startLocation;
 		private String destination;
@@ -7,8 +10,11 @@ public class Ride {
 		private int availableSeats;
 		private double price;
 		
+		private List<RideRequest> requests;
 		
-		public Ride()  {}
+		public Ride()  {
+			this.requests = new ArrayList<>();
+		}
 		
 		public Ride (String startLocation, String destination, String departureTime, int availableSeats, double price) {
 			this.startLocation = startLocation;
@@ -16,6 +22,7 @@ public class Ride {
 			this.departureTime = departureTime;
 			this.availableSeats = availableSeats;
 			this.price = price;
+			this.requests = new ArrayList<>();
 		}
 
 		
@@ -58,6 +65,36 @@ public class Ride {
 
 		public void setPrice(double price) {
 			this.price = price;
+		}
+		
+		public void addRequest(RideRequest request) {
+			if (availableSeats > 0) {
+				requests.add(request);
+				System.out.println("Request added from " + request.getPassengerName());
+			} else { 
+				System.out.println("No seats available for " + request.getPassengerName());
+			}
+		}
+		
+		public void approveRequest(RideRequest request) {
+			if (requests.contains(request) && availableSeats > 0) {
+				request.approve();
+				availableSeats--;
+				System.out.println("Request approved for " + request.getPassengerName());
+			} else {
+				System.out.println("Cannot approve request for " + request.getPassengerName());
+			}
+		}
+		
+		public void declineRequest(RideRequest request) {
+			if (requests.contains(request)) {
+				request.decline();
+				System.out.println("Request declined for " + request.getPassengerName());
+			}
+		}
+		
+		public List<RideRequest> getRequests() {
+			return requests;
 		}
 		
 		@Override
