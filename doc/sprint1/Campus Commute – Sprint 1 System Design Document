@@ -155,11 +155,8 @@ All data is stored locally in text files, so the system does not depend on an ex
 ## 5. System Architecture Diagram
 
 **Link to Lucidchart Diagram:**  
-[Campus Commute Architecture Diagram](https://lucid.app/lucidchart/d7fc61af-a351-4302-8f7c-6e68781b2923/edit?viewport_loc=-1526%2C-619%2C4299%2C2442%2C0_0&invitationId=inv_d4f502d9-acac-4278-9cda-256c1321061a)
+![Campus Commute Architecture Diagram](doc/sprint1/Architecture%20Diagram.png)
 
-If the image below doesn’t display clearly, open the link above.  
-
-![Architecture Diagram](UML_Architecture.png)
 
 ---
 
