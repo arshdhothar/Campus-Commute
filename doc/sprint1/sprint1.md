@@ -17,7 +17,7 @@ Name | Role | Capacity (hrs)
 Zack Nayar | Product Owner | 12  
 Arsh Dhothar | Scrum Master | 14  
 Sahil Panchal | Developer | 15  
-[Name 4] | Developer | 12  
+Ibrahim Khalil | Developer | 12  
 Alp Duras | Developer | 14  
 
 The user stories we selected are User Story 1 : Ride Posting (Driver) where drivers can set route, number of seats, and departure time.
