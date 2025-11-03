@@ -37,7 +37,7 @@ Campus Commute is a collaborative transportation platform designed for universit
 It allows students, staff, and faculty to **offer or request carpool rides** with others traveling along similar routes, as well as view available campus shuttles and parking options.  
 The system matches users heading to the same destination or area, enabling efficient ride-sharing within the campus network.  
 
-Sprint 1 focuses on building the core foundation — implementing user registration and authentication, route and ride management, and basic carpool-matching logic.  
+Sprint 1 focuses on building the core foundation, implementing user registration and authentication, route and ride management, and basic carpool-matching logic.  
 This document outlines the system’s design structure, including its classes, architecture, and environment setup, which together form the backbone for later features such as live tracking and payment integration.
 
 ---
@@ -155,7 +155,7 @@ All data is stored locally in text files, so the system does not depend on an ex
 ## 5. System Architecture Diagram
 
 **Link to Lucidchart Diagram:**  
-![Campus Commute Architecture Diagram](doc/sprint1/Architecture%20Diagram.png)
+![Campus Commute Architecture Diagram](Architecture%20Diagram.png)
 
 
 ---
