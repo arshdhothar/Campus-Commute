@@ -36,4 +36,8 @@ public class RideRequest {
 	public void setApproved(boolean approved) {
 		this.approved = approved;
 	}
+	
+	public void isDeclined() {
+		approved = false;
+	}
 }
