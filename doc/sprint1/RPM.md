@@ -30,7 +30,7 @@ Release Scope (Key Features):
 - Related user stories: US1, US2, US11, US14
 2. User Verification and Safety
 - Allow users to sign up and log in securely with university credentials. Verify drivers and passengers.
-- Related user stories: US3, US20
+- Related user stories: US3, US20, US21
 3. Communications & Notifications
 - Enable in-app messaging, notifications for ride requests and confirmations.
 - Related user stories: US5, US15
@@ -53,7 +53,7 @@ Release Scope (Key Features):
 - Ability to report lost items after rides.
 - Related user story: US16
 
-For Sprint 1, we have decided to give priority to core ride management, and authentication features as these are essential for a minimal functioning product. This includes the first 2 Key features listed above. We will prioritize user story 20, user story 1, and user story 2 for our minimal viable product.
+For Sprint 1, we have decided to give priority to core ride management, and authentication features as these are essential for a minimal functioning product. This includes the first 2 Key features listed above. We will prioritize user story 20,21, user story 1, and user story 2 for our minimal viable product.
 
 Participants and Responsibilities:
 1. Zack - Product Owner + Developer
