@@ -11,11 +11,24 @@ import java.awt.event.*;
 import java.util.ArrayList;
 import java.util.List;
 
+
+/**
+ * CampusCommuteGUI
+ *
+ * A simple GUI for adding and viewing available rides.
+ * 
+ * Users can input ride details (start, destination, time, seats, price)
+ * and add them to a list displayed on the right-hand side of the window.
+ */
 public class CampusCommuteGUI extends JFrame {
+	
+    // GUI components
 	private JPanel contentPane;
 	private JTextField startField, destinationField, timeField, seatsField, priceField;
 	private DefaultListModel<String> rideListModel;
 	private JList<String> rideList;
+	
+	// Data model
 	private List<Ride> rides;
 
 	/**
@@ -38,22 +51,27 @@ public class CampusCommuteGUI extends JFrame {
 	 * Create the frame.
 	 */
 	public CampusCommuteGUI() {
+		// Initialize the in-memory ride list 
 		rides  = new ArrayList<>();
 		
+		// Frame configuration
 		setTitle("Campus Commute");
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setSize(600, 450);
 		setLocationRelativeTo(null);
 		
+		// Main content panel
 		JPanel panel = new JPanel(new BorderLayout(10, 10));
 		panel.setBackground(new Color(245, 245, 245));
 		panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
 		setContentPane(panel);
 		
+		// Title label at the top
 		JLabel title = new JLabel("Campus Commute", SwingConstants.CENTER);
 		title.setFont(new Font("Segoe UI", Font.BOLD, 20));
 		panel.add(title, BorderLayout.NORTH);
 		
+		// Panel for user input fields
 		JPanel inputPanel = new JPanel(new GridLayout(6, 2, 8, 8));
 		inputPanel.setBackground(Color.WHITE);
 		inputPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Add Ride"), 
@@ -80,7 +98,6 @@ public class CampusCommuteGUI extends JFrame {
 		inputPanel.add(priceField);
 		
 		JButton addRideButton = new JButton("Add Ride");
-		addRideButton.setBackground(new Color(30, 144, 255));
 		addRideButton.setForeground(new Color(30, 144, 255));
 		addRideButton.setFocusPainted(false);
 		addRideButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
@@ -97,27 +114,37 @@ public class CampusCommuteGUI extends JFrame {
 		addRideButton.addActionListener(e -> addRide());
 	}
 	
+	/**
+	 * Handles adding a new ride to the list.
+	 * Reads input values, validates them, creates a new Ride, and updates the display.
+	 */
 	private void addRide() {
 		try {
+			
+			//Take user input
 			String start = startField.getText();
 			String dest = destinationField.getText();
 			String time = timeField.getText();
 			int seats = Integer.parseInt(seatsField.getText());
 			double price = Double.parseDouble(priceField.getText());
 			
+			//Create a ride in the list
 			Ride ride = new Ride(start, dest, time, seats, price);
 			rides.add(ride);
 			rideListModel.addElement(ride.toString());
 			
+			//Clear fields so a new ride can be entered
 			startField.setText("");
 			destinationField.setText("");
 			timeField.setText("");
 			seatsField.setText("");
 			priceField.setText("");
 			
+			//Success message
 			JOptionPane.showMessageDialog(this,  "Ride added successfully!");
 			
 		} catch (NumberFormatException ex) {
+			//Invalid input message
 			JOptionPane.showMessageDialog(this, "Seats and Price must be numeric");
 		}
 	}
