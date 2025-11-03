@@ -77,65 +77,101 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 
 ### **Class Name:** Ride  
 **Parent Class:** None  
-**Subclasses:** ShuttleRide, CarpoolRide  
+**Subclasses:** None  
 
-**Responsibilities:**  
-- Represent an individual ride or shuttle trip.  
-- Contain origin, destination, time, capacity, and driver info.  
-- Track ride status (booked / in progress / completed).  
+**Responsibilities:**
+- Store ride details (start, destination, time, seats, price)
+- Manage ride requests (add, approve, decline)
+- Track available seats
 
-**Collaborators:**  
-- User  
-- RideManager  
+**Collaborators:**
+- RideRequest
+- CampusCommuteGUI (Driver UI)
+- PassengerGUI (Passenger UI)
 
----
-
-### **Class Name:** RideManager  
-**Parent Class:** None  
-**Subclasses:** ShuttleManager, CarpoolManager  
-
-**Responsibilities:**  
-- Handle creation, assignment, and cancellation of rides.  
-- Match users to available drivers or shuttles.  
-- Update ride status and notify users.  
-
-**Collaborators:**  
-- User  
-- Ride  
-- DatabaseHandler  
 
 ---
 
-### **Class Name:** DatabaseHandler  
+### **Class Name:** RideRequest
 **Parent Class:** None  
 **Subclasses:** None  
 
-**Responsibilities:**  
-- Store and retrieve user and ride data.  
-- Maintain persistence between sessions.  
-- Provide CRUD operations for all modules.  
+**Responsibilities:**
+- Represent a passenger’s ride request
+- Store passenger name and approval status
+- Allow drivers to approve or decline requests
 
-**Collaborators:**  
-- User  
-- RideManager  
-- Ride  
+**Collaborators:**
+- Ride
+- PassengerGUI
+- CampusCommuteGUI
+---
+
+### **Class Name:** Passenger  
+**Parent Class:** None  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Represent a passenger user
+- Search rides by location, time, or destination
+- Send ride requests to drivers
+
+**Collaborators:**
+- Ride
+- RideRequest
+- PassengerGUI
 
 ---
 
 ### **Class Name:** CampusCommuteGUI  
-**Parent Class:** UIController  
+**Parent Class:** JFrame  
 **Subclasses:** None  
 
-**Responsibilities:**  
-- Display the interface for login, route viewing, and ride requests.  
-- Handle input and display messages.  
-- Connect user actions to RideManager.  
+**Responsibilities:**
+- Provide the Driver Portal UI for adding rides
+- Display and update list of rides
+- Approve or decline passenger ride requests
+- Open Passenger View for testing
 
-**Collaborators:**  
-- User  
-- RideManager  
+**Collaborators:**
+- Ride
+- RideRequest
+- PassengerGUI
+---
+### **Class Name:** PassengerGUI  
+
+**Parent Class:** JFrame  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Provide Passenger Portal UI for searching rides
+- Display ride matches by location/time/destination
+- Allow passengers to send ride requests
+
+**Collaborators:**
+- Ride
+- RideRequest
+- Passenger
+
 
 ---
+### **Class Name:** CommuteFrame
+
+**Parent Class:** JFrame  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Display welcome screen with Login / Sign-Up
+- Serve as entry point for launching modules
+
+**Collaborators:**
+- CampusCommuteGUI
+- PassengerGUI
+
+
+---
+
+
 
 ---
 
