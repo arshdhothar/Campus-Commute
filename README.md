@@ -45,7 +45,7 @@ If you have trouble creating a token follow : https://stackoverflow.com/question
 1. Download our main repository as a zip file
 2. Eclipse -> File -> Import-> Existing Projects in to workspace
 3. choose the downloaded zip file as an archive file
-4. **MAKE SURE TO UN CHECK CAMPUSCOMMUTE under projects, this is really important -> click finish
+4. **MAKE SURE TO UN CHECK CAMPUSCOMMUTE** under projects, this is really important -> click finish
 5. you are ready to go
 
 ---
