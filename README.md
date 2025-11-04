@@ -1,5 +1,5 @@
 Project Demo Video - Sprint1: https://www.youtube.com/watch?v=ElhrqJMuVyE&feature=youtu.be
-![Logo](imgur.com/a/4Nw3PuU.png)
+![Logo](imgur.com/7YiWyhJ.png)
 # **CampusCommute**
 
 ## **Motivation and Project Description**
