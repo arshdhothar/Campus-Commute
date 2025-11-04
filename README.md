@@ -31,6 +31,7 @@ To run our project, you need:
 - **GitHub**
 
 ### **1. Import Using Git Integration In eclipse**
+Video available for instructions : https://www.youtube.com/watch?v=u9FjJkZeWgg
 1. In eclipse, Go To File -> Import
 2. Git -> Project From Git(with smart import)
 3. The url field should be the link to the repository, user is your github username and the password is a classic token generated in github(not your actual password), press next
@@ -41,17 +42,11 @@ If you have trouble creating a token follow : https://stackoverflow.com/question
 7. Now you have acess to our application
 
 ### **2. Build and Run the Project**
-1. Right-click the project name in **Package Explorer** → **Build Project** to compile all files.  
-2. Open the **main class** that starts the project.  
-3. Click **Run As → Java Application**.  
-4. The **Java Swing GUI** will appear — this is the user interface for the project.  
-5. To stop the program, simply close the GUI window.
-
-### **3. Running from a ZIP File**
-1. Zip the project.  
-2. Open Eclipse → **Import Existing Projects into Workspace**.  
-3. Select the downloaded project and import it.  
-4. Run the GUI files to recreate the Sprint 1 demo video.
+1. Download our main repository as a zip file
+2. Eclipse -> File -> Import-> Existing Projects in to workspace
+3. choose the downloaded zip file as an archive file
+4. **MAKE SURE TO UN CHECK CAMPUSCOMMUTE under projects, this is really important -> click finish
+5. you are ready to go
 
 ---
 
