@@ -80,9 +80,11 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 **Subclasses:** None  
 
 **Responsibilities:**
-- Store ride details (start, destination, time, seats, price)
-- Manage ride requests (add, approve, decline)
-- Track available seats
+- Represent a single ride listing created by a driver.
+- Stores ride details such as start location, destination, departure time, available seats, and price.
+- Provides methods to return formatted ride details (e.g., via toString() for display in the GUI).
+- Validates ride information to ensure numeric and logical correctness (e.g., seat and price validation).
+
 
 **Collaborators:**
 - RideRequest
@@ -97,9 +99,10 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 **Subclasses:** None  
 
 **Responsibilities:**
-- Represent a passenger’s ride request
-- Store passenger name and approval status
-- Allow drivers to approve or decline requests
+- Represents a request made by a passenger seeking a ride.
+- Stores user details, desired start location, destination, and time preferences.
+- Provides comparison and matching functionality against existing Ride objects to find suitable rides.
+
 
 **Collaborators:**
 - Ride
@@ -128,10 +131,11 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 **Subclasses:** None  
 
 **Responsibilities:**
-- Provide the Driver Portal UI for adding rides
-- Display and update list of rides
-- Approve or decline passenger ride requests
-- Open Passenger View for testing
+- Acts as the main user interface for CampusCommute.
+- Collects input for rides and ride requests from the user.
+- Displays available rides and handles UI interaction such as adding a new ride or showing error popups.
+- Connects user interface actions with model operations (e.g., creating new Ride objects and displaying them in the list).
+
 
 **Collaborators:**
 - Ride
