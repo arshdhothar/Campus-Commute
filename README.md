@@ -1,3 +1,4 @@
+Project Demo Video - Sprint1: https://www.youtube.com/watch?v=ElhrqJMuVyE&feature=youtu.be
 # Motivation and Project Description
 
 CampusCommute is a university exclusive ride sharing platform designed to make traveling to and from campus for students and staff safer and cheaper. Many students and staff have to rely on public transportation or expensive alternatives such as Uber or Lyft. CampusCommute provides a trusted community based solution where only verified university members can post or join rides. The problems we solve include the following:
