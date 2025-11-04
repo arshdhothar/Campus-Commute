@@ -1,4 +1,4 @@
-Motivation and Project Description
+# Motivation and Project Description
 
 CampusCommute is a university exclusive ride sharing platform designed to make traveling to and from campus for students and staff safer and cheaper. Many students and staff have to rely on public transportation or expensive alternatives such as Uber or Lyft. CampusCommute provides a trusted community based solution where only verified university members can post or join rides. The problems we solve include the following:
 
@@ -20,7 +20,7 @@ Promote sustainability
 
 The goal of CampusCommute is to build trust and offer convenience for members within the campus through a simple and reliable ride sharing experience.
 
-Installation for your Software/System:
+# Installation for your Software/System:
 
 To run our project we need to have Java JDK 21, Java Swing (Which is included in Java 21) , Eclipse IDE for Java Developers, Github.
 
@@ -38,7 +38,7 @@ To stop the program simply close the GUI screen.
 
 To run the code, zip the project, open eclipse and import existing projects into the workspace. Import the downloaded project and run the GUI files to recreate sprint 1 demo video.
 
-Contribution:
+# Contribution:
 
 As a group we use a simple and organised process to manage the contribution for our project.
 
