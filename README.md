@@ -36,6 +36,8 @@ To run the application open the main class that starts our project and then clic
 
 To stop the program simply close the GUI screen.
 
+To run the code, zip the project, open eclipse and import existing projects into the workspace. Import the downloaded project and run the GUI files to recreate sprint 1 demo video.
+
 Contribution:
 
 As a group we use a simple and organised process to manage the contribution for our project.
