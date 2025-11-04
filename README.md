@@ -38,8 +38,7 @@ If you have trouble creating a token follow : https://stackoverflow.com/question
 4. Select the branches you want to download then press next
 5. Choose the initial branch as main and press next
 6. In this screen, it is very important **uncheck Search for nested projects** this is very important and check detect and configure project natures and click finish
-
-   Once done coding, click the project → **Commit** → write a short comment about your changes → **Commit and Push**.
+7. Now you have acess to our application
 
 ### **2. Build and Run the Project**
 1. Right-click the project name in **Package Explorer** → **Build Project** to compile all files.  
