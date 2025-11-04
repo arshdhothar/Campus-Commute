@@ -41,7 +41,7 @@ If you have trouble creating a token follow : https://stackoverflow.com/question
 6. In this screen, it is very important **uncheck Search for nested projects** this is very important and check detect and configure project natures and click finish
 7. Now you have acess to our application
 
-### **2. Build and Run the Project**
+### **2.Import using downloaded zip file**
 1. Download our main repository as a zip file
 2. Eclipse -> File -> Import-> Existing Projects in to workspace
 3. choose the downloaded zip file as an archive file
