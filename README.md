@@ -30,11 +30,16 @@ To run our project, you need:
 - **Eclipse IDE for Java Developers**  
 - **GitHub**
 
-### **1. Connect Eclipse to GitHub**
-1. In Eclipse, click the **Perspective** button and select **Git**.  
-2. Choose **Clone a Git Repository** and paste your GitHub project URL.  
-3. Right-click the cloned repo → **Import Projects → Existing Eclipse Project → Finish**.  
-4. Once done coding, click the project → **Commit** → write a short comment about your changes → **Commit and Push**.
+### **1. Import Using Git Integration In eclipse**
+1. In eclipse, Go To File -> Import
+2. Git -> Project From Git(with smart import)
+3. The url field should be the link to the repository, user is your github username and the password is a classic token generated in github(not your actual password), press next
+If you have trouble creating a token follow : https://stackoverflow.com/questions/29807277/cloning-the-git-repository-on-eclipse-transport-error
+4. Select the branches you want to download then press next
+5. Choose the initial branch as main and press next
+6. In this screen, it is very important **uncheck Search for nested projects** this is very important and check detect and configure project natures and click finish
+
+   Once done coding, click the project → **Commit** → write a short comment about your changes → **Commit and Push**.
 
 ### **2. Build and Run the Project**
 1. Right-click the project name in **Package Explorer** → **Build Project** to compile all files.  
