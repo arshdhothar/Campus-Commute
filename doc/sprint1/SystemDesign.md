@@ -159,6 +159,27 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 
 
 ---
+### **Class Name:** SignupFrame
+
+**Parent Class:** None 
+**Subclasses:** None  
+
+**Responsibilities:**
+- Provide input spaces for signup details
+- Ensure correct formatting of given input (correct date,phone number etc.)
+- Leads user to login frame after successful sign up
+- Informing users of what they are doing wrong
+
+
+**Collaborators:**
+- Person
+-UserDataManager
+  LoginFrame
+
+
+
+---
+
 ### **Class Name:** CommuteFrame
 
 **Parent Class:** JFrame  
@@ -172,12 +193,51 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 - CampusCommuteGUI
 - PassengerGUI
 
+---
+### **Class Name:** UserDataManager
+
+**Parent Class:** None 
+**Subclasses:** None  
+
+**Responsibilities:**
+- Store given user data at a json file stored in the project
+-Ensure the correct formatting of json form in the file
+-Provide content check processes to external classes, to check for user data in the json file
+-Ensure safekeeping of string formatting using escaping and unescaping 
+
+
+**Collaborators:**
+- Person
+-SignupFrame
+-Login Frame
+-RideRequest
+
+
 
 ---
 
+### **Class Name:** LoginFrame
+
+**Parent Class:** None 
+**Subclasses:** None  
+
+**Responsibilities:**
+- Provide input spaces for login details
+- Ensure correct formatting of given input 
+- Allows users to to reach to signup frame if they need to signup 
+- Informing users of what they are doing wrong, or if their credentials are wrong
+
+
+**Collaborators:**
+- Person
+-UserDataManager
+- SignupFrame
+
+
 
 
 ---
+
 
 ## 4. System Interaction and Environment
 
