@@ -1,11 +1,11 @@
-# Campus Commute – Sprint 1 System Design Document
+# Campus Commute – Sprint 2 System Design Document
 **EECS 3311 – Software Design (Fall 2025)**  
 
 **Team Name:** CampusCommute  
 **Instructor:** Ilir Dema  
 **TA:** [TA Name]  
-**Date:** Nov 3rd, 2025  
-**Sprint:** Sprint 1  
+**Date:** Nov 9th, 2025  
+**Sprint:** Sprint 2  
 
 ---
 
@@ -234,6 +234,57 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 - SignupFrame
 
 
+
+
+---
+
+### **Class Name:** UserProfile  
+**Parent Class:** None  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Store user profile information such as bio and photo path.
+- Provide methods to update and retrieve profile data.
+- Persist profile data locally (using file serialization).
+
+
+**Collaborators:**
+- ProfileCustomizationGUI (for display and editing)
+- User (to associate profile with a user account)
+
+
+---
+
+### **Class Name:** User  
+**Parent Class:** None  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Store and manage the user’s username.
+- Provide access to the username for other classes.
+
+
+**Collaborators:**
+- ProfileCustomizationGUI (used to associate the profile with a specific user)
+- UserProfile (each user has an associated profile)
+
+
+---
+
+### **Class Name:** ProfileCustomizationGUI  
+**Parent Class:** None  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Provide a GUI for users to edit their profile.
+- Allow users to update bio and upload a profile photo.
+- Display profile data and photo dynamically in the GUI.
+- Save the profile to disk after edits.
+
+
+**Collaborators:**
+- User (determines which profile is being edited)
+- UserProfile (stores and provides the profile data)
 
 
 ---
