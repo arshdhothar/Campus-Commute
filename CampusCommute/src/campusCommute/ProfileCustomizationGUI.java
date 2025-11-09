@@ -22,7 +22,7 @@ public class ProfileCustomizationGUI extends JFrame {
         // Load existing profile or create new one
         profile = loadOrCreateProfile();
 
-        // --- Left panel: Profile picture ---
+        // Left panel: Profile picture
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
 
@@ -45,7 +45,7 @@ public class ProfileCustomizationGUI extends JFrame {
         leftPanel.add(photoLabel, BorderLayout.CENTER);
         leftPanel.add(uploadPanel, BorderLayout.SOUTH);
 
-        // --- Right panel: Bio + Save ---
+        // Right panel: Bio + Save buton
         JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
         rightPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 20));
 
@@ -62,11 +62,11 @@ public class ProfileCustomizationGUI extends JFrame {
         rightPanel.add(bioScroll, BorderLayout.CENTER);
         rightPanel.add(saveButton, BorderLayout.SOUTH);
 
-        // --- Add both panels side by side ---
+        // Add both panels side by side
         add(leftPanel, BorderLayout.WEST);
         add(rightPanel, BorderLayout.CENTER);
 
-        // --- Button Logic ---
+        // Button Logic
         uploadButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
