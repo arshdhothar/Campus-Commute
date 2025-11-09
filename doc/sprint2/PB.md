@@ -1,5 +1,5 @@
 # 20 User Stories: (Sorted By Order of Completion)
-[Trello link](https://trello.com/invite/b/68cde0f68b3f22f748c81e76/ATTI2b6976d1181f719eed88d3385e4290c2793E2F0B/my-trello-board)
+## [Trello link](https://trello.com/invite/b/68cde0f68b3f22f748c81e76/ATTI2b6976d1181f719eed88d3385e4290c2793E2F0B/my-trello-board)
 
 ## In Progress 🔄️
 
@@ -25,6 +25,16 @@ Acceptance Criteria:
 * Users can leave optional written feedback.
 * Average ratings are displayed on user profiles.
 * Admins can review and act on low rated or reported rides.
+
+### User Story 5: In-App Chat & Notifications
+
+As a driver I want to send short messages about the ride so passengers will be prepared for pickup. As a passenger I want to receive notifications and updates on my ride so I can stay informed of any changes.
+
+Acceptance Criteria:
+
+* An in-app chat is available between matched drivers and passengers.
+* Users receive notifications for new messages, ride requests, and confirmations.
+* Drivers can notify all passengers of delays or route changes.
 
 ### User Story 7: Driver Incentives 
 
@@ -56,19 +66,19 @@ Acceptance Criteria:
 * Each ride includes an option to view or download a receipt.
 * Only completed rides appear in the history tab.
 
-___
+### User Story 16 - Lost & Found Reporting
 
-# Unassigned 📥
-
-### User Story 5: In-App Chat & Notifications
-
-As a driver I want to send short messages about the ride so passengers will be prepared for pickup. As a passenger I want to receive notifications and updates on my ride so I can stay informed of any changes.
+As a rider or driver, I want to report lost items after a trip so that they can be returned to the rightful owner.
 
 Acceptance Criteria:
 
-* An in-app chat is available between matched drivers and passengers.
-* Users receive notifications for new messages, ride requests, and confirmations.
-* Drivers can notify all passengers of delays or route changes.
+* Post-ride “Report Lost Item” option available.
+* Reports include ride details, contact method, and item description.
+* Notifications sent to the other participant (driver/rider).
+
+___
+
+# Unassigned 📥
 
 ### User Story 6: Payment
 
@@ -145,16 +155,6 @@ Acceptance Criteria:
 *Users can toggle on/off ride confirmations, cancellations, and reminders.
 *Notification settings are saved in the user profile.
 *System respects user preferences when sending alerts.
-
-### User Story 16 - Lost & Found Reporting
-
-As a rider or driver, I want to report lost items after a trip so that they can be returned to the rightful owner.
-
-Acceptance Criteria:
-
-* Post-ride “Report Lost Item” option available.
-* Reports include ride details, contact method, and item description.
-* Notifications sent to the other participant (driver/rider).
 
 ### User Story 17 - Emergency Contact Information
 
