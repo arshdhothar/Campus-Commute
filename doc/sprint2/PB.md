@@ -1,8 +1,6 @@
 # 20 User Stories: (Sorted By Order of Completion)
 [Trello link](https://trello.com/invite/b/68cde0f68b3f22f748c81e76/ATTI2b6976d1181f719eed88d3385e4290c2793E2F0B/my-trello-board)
 
-___
-
 ## In Progress 🔄️
 
 ### User Story 3: Safety and Verification
