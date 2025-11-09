@@ -36,35 +36,36 @@ Acceptance Criteria:
 * Users receive notifications for new messages, ride requests, and confirmations.
 * Drivers can notify all passengers of delays or route changes.
 
-### User Story 7: Driver Incentives 
-
-As a frequent driver I want to earn recognition for consistent participation so that I am motivated to continue offering rides to the campus community.
-
-Acceptance Criteria: 
-
-* The system tracks driver stats such as number of passengers picked up and number of rides completed.
-* Drivers can earn milestone badges when a new milestone is reached.
-* A leaderboard to showcase top contributors to the community.
-
-### User Story 8: Emergency Assistance Button
+### User Story 7: Emergency Assistance Button  
 
 As a passenger or driver, I want to have access to an emergency button during rides so that I can quickly request for help if I feel unsafe or have an issue.
 
-Acceptance Criteria:
+Acceptance Criteria: 
 
 * The ride screen includes an emergency button visible at all times.
 * Pressing the button instantly shares the ride’s live location with emergency contacts.
 * The user can customize their emergency contacts.
 
-### User Story 9: Ride History
+### User Story 8: Ride History
 
-I want to view past rides so that I can keep track of my travel history as well as expenses. Moreover I can track my commuting habits and manage my schedule efficiently.
+As a passenger or driver, I want to view past rides so that I can keep track of my travel history as well as expenses. Moreover I can track my commuting habits and manage my schedule efficiently.
 
 Acceptance Criteria:
 
 * The ride history tab displays previous rides with the date available.
 * Each ride includes an option to view or download a receipt.
 * Only completed rides appear in the history tab.
+
+### User Story 9: Profile Customization
+
+As a user, I want to be able to add a picture and a short bio to my profile so that other people can recognize me and feel more comfortable sharing rides.
+
+Acceptance Criteria:
+
+* I can upload a profile photo and write a short description about myself.
+* My profile can show small badges like “Verified Driver” or “Top Passenger.”
+* I can change or hide my info whenever I want.
+* The app should flag any inappropriate photos or text.
 
 ### User Story 16 - Lost & Found Reporting
 
@@ -91,16 +92,15 @@ Acceptance Criteria:
 * Passengers are automatically charged when the trip is done.
 * Drivers receive payment within 24 hours.
 
-### User Story 10 - Profile Customization
+### User Story 10 - Route Optimization
 
-As a user, I want to be able to add a picture and a short bio to my profile so that other people can recognize me and feel more comfortable sharing rides.
+As a driver, I want the app to suggest the most efficient route for my trip so that I can save time and fuel.
 
 Acceptance Criteria:
 
-* I can upload a profile photo and write a short description about myself.
-* My profile can show small badges like “Verified Driver” or “Top Passenger.”
-* I can change or hide my info whenever I want.
-* The app should flag any inappropriate photos or text.
+* The app shows a recommended route based on pickup/drop-off points.
+* Displays estimated time and distance.
+* Allows driver to edit or confirm the suggested route.
 
 ### User Story 11 - Carpool Scheduling (Recurring Rides)
 
