@@ -56,6 +56,8 @@ Acceptance Criteria:
 * Each ride includes an option to view or download a receipt.
 * Only completed rides appear in the history tab.
 
+___
+
 # Unassigned 📥
 
 ### User Story 5: In-App Chat & Notifications
@@ -188,6 +190,8 @@ Acceptance Criteria:
 * App fetches weather data for the route at departure time.
 * If conditions like heavy rain or snow are detected, send an in-app notification.
 * Drivers and riders can choose to confirm or reschedule the trip.
+
+___
 
 ## Completed ✅
 
