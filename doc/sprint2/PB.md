@@ -79,7 +79,7 @@ Acceptance Criteria:
 
 ___
 
-# Unassigned 📥
+## Unassigned 📥
 
 ### User Story 6: Payment
 
