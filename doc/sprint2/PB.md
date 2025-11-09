@@ -10,11 +10,8 @@ As a university admin staff , I want to ensure that only verified members of the
 Acceptance Criteria:
 
 * All users must register using their official university email or ID.
-
 * Drivers must upload a valid driver’s license and vehicle info for verification.
-
 * Unverified users cannot post or request rides.
-
 * Admin dashboard shows verification status of users and vehicles.
 
 ### User Story 4: Ratings and Feedback System
