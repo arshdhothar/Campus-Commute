@@ -289,6 +289,71 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 
 ---
 
+### **Class Name:** RideHistoryFrame
+**Parent Class:** None  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Display completed rides for a driver or passenger.
+- Allow users to view and download ride receipts.
+- Load ride data from RideService.
+- Show only finished rides with relevant details (date, cost, route).
+
+**Collaborators:**
+- RideService:fetches and provides ride data.
+- Ride:holds individual ride information.
+- NotificationCenter:shows confirmation popups or alerts.
+
+---
+### **Class Name:** NotificationCenter
+**Parent Class:** None  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Manage and send real-time notifications to users.
+- Notify drivers and passengers about ride requests
+- Support UI popups using Swing.
+
+**Collaborators:**
+- RideService: triggers notifications based on actions.
+- Driver: receives or sends notifications.
+- Passenger:receives or sends notifications.
+- JFrame (UI): displays popups through Swing.
+
+---
+### **Class Name:** RideService
+**Parent Class:** None  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Manage all rides, requests, and approvals in the system.
+- Handle ride creation, searching.
+- Update ride statuses.
+- Notify users through NotificationCenter for ride events.
+- Save and load ride data using RideDataManager
+
+**Collaborators:**
+- Driver: publishes rides.
+- Passenger: requests rides.
+- Ride:stores ride details.
+- NotificationCenter: sends alerts.
+- RideDataManager
+---
+### **Class Name:** RideDataManager
+**Parent Class:** None  
+**Subclasses:** None  
+
+**Responsibilities:**
+- Read and write ride data to ridesData.json.
+- Convert ride objects to JSON format and back.
+- Maintain storage of all ride information.
+- Load saved rides when the application starts.
+
+**Collaborators:**
+- Ride: represents stored data.
+- RideService: requests and updates data.
+
+---
 
 ## 4. System Interaction and Environment
 
