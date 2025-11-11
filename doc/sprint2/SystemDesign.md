@@ -4,7 +4,7 @@
 **Team Name:** CampusCommute  
 **Instructor:** Ilir Dema  
 **TA:** [TA Name]  
-**Date:** Nov 9th, 2025  
+**Date:** Nov 11th, 2025  
 **Sprint:** Sprint 2  
 
 ---
@@ -354,6 +354,21 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 - RideService: requests and updates data.
 
 ---
+
+### **Class Name:** NotificationSettingsFrame
+**Parent Class:** JFrame
+**Subclasses:** None  
+
+**Responsibilities:**
+- Show a window where users can choose which notifications they want to receive.
+- Provide checkboxes for ride confirmations, ride cancellations, and ride reminders.
+- Let users press a “Save Preferences” button to confirm their choices.
+
+**Collaborators:**
+- NotificationCenter
+- Person 
+
+ ---
 
 ## 4. System Interaction and Environment
 
