@@ -15,7 +15,7 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 
 | Name | Role | Capacity (hrs) |
 |------|------|----------------|
-| Zack Nayar | Product Owner | 12 |
+| Zack Nayar | Product Owner | 14 |
 | Arsh Dhothar | Scrum Master | 14 |
 | Sahil Panchal | Developer | 15 |
 | Ibrahim Khalil | Developer | 12 |
@@ -71,9 +71,10 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 
 ### **Zack**  
 - Prepare and submit **`schedule.pdf`** (network diagram + critical path explanation).  
-- Implement and test **User Story 8**.    
+- Implement and test **User Story 8 and 15**.    
 - Update CRC cards and System Design document after completion.  
-- Post minimum 3 standups.  
+- Post minimum 3 standups.
+- Finshed connecting the driving and passeneger interface
 
 ---
 
