@@ -1,5 +1,11 @@
 package campusCommute;
 
+//Add these lines with your other imports
+import com.google.gson.Gson;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
@@ -59,12 +65,11 @@ public class SignUpFrame extends JFrame {
         setMinimumSize(new Dimension(460, getHeight()));
         setLocationRelativeTo(null);
     }
-/**
- * This method handles all the formatting checkings done for signup
- * @param evt
- */
+
+    
     private void handleSignUp(ActionEvent evt) {
-        //Trim the strings for safe format checking
+        // --- 1. This is all your original validation code ---
+        // (It's good code, we're keeping it)
         String email   = emailField.getText().trim();
         String fName   = fNameField.getText().trim();
         String lName   = lNameField.getText().trim();
@@ -74,7 +79,6 @@ public class SignUpFrame extends JFrame {
         String adress  = adressField.getText().trim();
         String userType= (String) userTypeBox.getSelectedItem();
 
-        //This block checkks if any field is left empty, if uses pop out message to warn the user
         if (email.isEmpty() || fName.isEmpty() || lName.isEmpty()
                 || dob.isEmpty() || pass.isEmpty() || phone.isEmpty()
                 || adress.isEmpty() || userType == null || userType.isEmpty()) {
@@ -85,8 +89,7 @@ public class SignUpFrame extends JFrame {
             return;
         }
 
-        //this block validates the format of the Date of birth, ensures its in YYYY-MM-DD format, displays error if not
-        //uses helper method isValidDate from below
+        // Add your other validation checks here too (like for date and phone)
         if (!isValidDateYYYYMMDD(dob)) {
             JOptionPane.showMessageDialog(this,
                     "DOB must be in the format YYYY-MM-DD (e.g., 2001-02-28).",
@@ -94,17 +97,6 @@ public class SignUpFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
-
-        //checks if the phone number is less than 11 digits
-        if (phone.length() > 11) {
-            JOptionPane.showMessageDialog(this,
-                    "Phone must not be longer than 11 characters.",
-                    "Invalid Phone",
-                    JOptionPane.ERROR_MESSAGE);
-            return;
-        }
-
-        //checks if the phone number is made out of ints only, no strings allowed
         if (!phone.matches("\\d{1,11}")) {
             JOptionPane.showMessageDialog(this,
                     "Phone must contain only digits (max 11).",
@@ -112,36 +104,65 @@ public class SignUpFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
-        //after the checks tries to create a person object using all the input data
+        
+
+        // --- 2. This is the new networking part ---
         try {
+            // Create the Person object just like before
+            // NOTE: Make sure your Person.java in this GUI project still has
+            // this constructor.
             Person p = new Person(
-                email,
-                phone,
-                fName,
-                lName,
-                dob,
-                pass,
-                adress,
-                userType
+                email, phone, fName, lName, dob, pass, adress, userType
             );
-            //calls static method from user data manager, to append the user to the json file
-            UserDataManager.addUser(p);
-//sucess message
-            JOptionPane.showMessageDialog(this,
-                "Sign-up successful! You can now log in.",
-                "Account Created",
-                JOptionPane.INFORMATION_MESSAGE);
-//on sucess close this window, and open a login window
-            SwingUtilities.invokeLater(() -> {
-                dispose(); // closes this SignUpFrame
-                new LoginFrame().setVisible(true); // opens login window
-            });
+            
+            // This is the new code that replaces UserDataManager.addUser(p)
+
+            // 1. Convert the Person object to a JSON string
+            Gson gson = new Gson();
+            String jsonRequestBody = gson.toJson(p);
+
+            // 2. Create an HTTP client (the "phone")
+            HttpClient client = HttpClient.newHttpClient();
+
+            // 3. Create a request to send to your server (the "order")
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/api/signup")) // Your server's API endpoint
+                    .header("Content-Type", "application/json") // Tell the server we're sending JSON
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody)) // Send the JSON data
+                    .build();
+
+            // 4. Send the request and get the response
+            // We're using send() for simplicity. It will "freeze" the GUI
+            // for a split second, which is fine for this project.
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // 5. Check if the server said "OK" (HTTP code 200)
+            if (response.statusCode() == 200) {
+                JOptionPane.showMessageDialog(this,
+                    "Sign-up successful! You can now log in.",
+                    "Account Created",
+                    JOptionPane.INFORMATION_MESSAGE);
+                
+                // Open the login window
+                SwingUtilities.invokeLater(() -> {
+                    dispose(); // closes this SignUpFrame
+                    new LoginFrame().setVisible(true); // opens login window
+                });
+            } else {
+                // Show an error if the server failed
+                JOptionPane.showMessageDialog(this,
+                    "Sign-up failed. Server responded with: " + response.statusCode(),
+                    "Server Error",
+                    JOptionPane.ERROR_MESSAGE);
+            }
 
         } catch (Exception ex) {
+            // This catches network errors (like if the server is off)
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                "Error saving user: " + ex.getMessage(),
-                "File Error",
+                "Error during sign-up: " + ex.getMessage() + 
+                "\n\n(Did you remember to run the Springboot server?)",
+                "Connection Error",
                 JOptionPane.ERROR_MESSAGE);
         }
     }

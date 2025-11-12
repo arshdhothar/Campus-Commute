@@ -117,7 +117,7 @@ public class UserDataManager {
         String lName    = safe(p.getlName());
         String dob      = safe(p.getDOB());
         String password = safe(p.getPassword());
-        String adress   = safe(p.getAdress());   
+        String address   = safe(p.getaddress());   
         String userType = safe(p.getUserType());
         //creates a chain string builder, the {} brackets are there to ensure each person is seperated
         return new StringBuilder()
@@ -128,7 +128,7 @@ public class UserDataManager {
             .append("\"lName\":\"").append(esc(lName)).append("\",")
             .append("\"DOB\":\"").append(esc(dob)).append("\",")
             .append("\"password\":\"").append(esc(password)).append("\",")
-            .append("\"adress\":\"").append(esc(adress)).append("\",")
+            .append("\"address\":\"").append(esc(address)).append("\",")
             .append("\"userType\":\"").append(esc(userType)).append("\"")
             .append("}")
             .toString();

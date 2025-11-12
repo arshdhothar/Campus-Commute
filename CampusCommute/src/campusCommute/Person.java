@@ -1,22 +1,28 @@
-package campusCommute;
-/**
- * This class is used to store data for a person object, it is used by userdatamanager to append to a json file,
- */
+package campusCommute; 
+
 public class Person {
-	private String email,phone,fName,lName,DOB,password,adress,userType;
-	
-	public Person(String email,String phone,String fName,String lName,String DOB,String password,String adress,String userType) {
-		
-		this.email=email;
-		this.phone= phone;
-		this.fName=fName;
-		this.lName= lName;
-		this.DOB=DOB;
-		this.password=password;
-		this.adress=adress;
+
+	private Long ID; 
+	private String email, phone, fName, lName, DOB, password, address, userType;
+
+	public Person() {
+	}
+
+	public Person(String email, String phone, String fName, String lName, String DOB, String password, String address,
+			String userType) {
+		this.email = email;
+		this.phone = phone;
+		this.fName = fName;
+		this.lName = lName;
+		this.DOB = DOB;
+		this.password = password;
+		this.address = address;
 		this.userType = userType;
 	}
-//getter and setters for class
+
+	public Long getID() {
+		return ID;
+	}
 
 	public String getEmail() {
 		return email;
@@ -66,24 +72,19 @@ public class Person {
 		this.phone = phone;
 	}
 
-	public String getAdress() {
-		return adress;
+	public String getaddress() {
+		return address;
 	}
 
-	public void setAdress(String adress) {
-		this.adress = adress;
+	public void setaddress(String address) {
+		this.address = address;
 	}
-
 
 	public String getUserType() {
 		return userType;
 	}
 
-
 	public void setUserType(String userType) {
 		this.userType = userType;
 	}
-
-
-
 }

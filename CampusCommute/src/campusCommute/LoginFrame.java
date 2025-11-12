@@ -1,5 +1,10 @@
 package campusCommute;
 
+import com.google.gson.Gson;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import javax.swing.*;
 import java.awt.*;
 /**
@@ -21,7 +26,7 @@ public class LoginFrame extends JFrame {
         base.insets = new Insets(8, 12, 8, 12);
         base.fill = GridBagConstraints.HORIZONTAL;
         
-        //uses the addrow helper to add fields to the window
+        //uses the add row helper to add fields to the window
         int row = 0;
         addRow(form, base, row++, "Email:", emailField);
         addRow(form, base, row++, "Password:", passwordField);
@@ -48,72 +53,72 @@ public class LoginFrame extends JFrame {
         setMinimumSize(new Dimension(400, getHeight()));
         setLocationRelativeTo(null);
     }
-/**
- * Helper method to validate login information
- */
-
+    /**
+     * Helper method to validate login information
+     */
     private void validateAndMaybeLogin() {
-        //reset borders on call
+        // --- 1. Your original validation ---
         emailField.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
         passwordField.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
-        //trim inputs for formatting
         String email = emailField.getText().trim();
         String pass  = new String(passwordField.getPassword()).trim();
-        //check if the input fields are empty
-        boolean emailEmpty = email.isEmpty();
-        boolean passEmpty  = pass.isEmpty();
-        
-        //checks for the fields
-        if (emailEmpty || passEmpty) {
-        	//if empty email higlihht email red
-            if (emailEmpty) {
-                emailField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            }
-            //if password is empty highlight password red
-            if (passEmpty) {
-                passwordField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            }
 
-            String msg;
-            //msg to show to the user for the empty field
-            if (emailEmpty && passEmpty) {
-                msg = "Please enter your email and password.";
-            } else if (emailEmpty) {
-                msg = "Please enter your email.";
-            } else {
-                msg = "Please enter your password.";
-            }
-            //Sends popup window warning
-            JOptionPane.showMessageDialog(this, msg, "Missing Information", JOptionPane.WARNING_MESSAGE);
+        if (email.isEmpty() || pass.isEmpty()) {
+            if (email.isEmpty()) emailField.setBorder(BorderFactory.createLineBorder(Color.RED));
+            if (pass.isEmpty()) passwordField.setBorder(BorderFactory.createLineBorder(Color.RED));
+            JOptionPane.showMessageDialog(this, "Please enter both email and password.", "Missing Information", JOptionPane.WARNING_MESSAGE);
             return;
         }
 
+        // --- 2. The new networking part ---
         try {
-        	//checks if the given inputs match the one in the database using the static method from userdatamanager
-            boolean ok = UserDataManager.validateCredentials(email, pass);
-            //if the check fails, dispplays an erorr message about wrong credentials
-            if (!ok) {
+            // 1. Create the LoginRequest object
+            LoginRequest loginData = new LoginRequest(email, pass);
+
+            // 2. Convert it to JSON
+            Gson gson = new Gson();
+            String jsonRequestBody = gson.toJson(loginData);
+
+            // 3. Create the client and request
+            HttpClient client = HttpClient.newHttpClient();
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI("http://localhost:8080/api/login")) // The new login endpoint
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody))
+                    .build();
+
+            // 4. Send the request
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            // 5. Check the response code!
+            if (response.statusCode() == 200) {
+                // 200 = OK (Success!)
+                JOptionPane.showMessageDialog(this,
+                        "Login successful!",
+                        "Welcome",
+                        JOptionPane.INFORMATION_MESSAGE);
+            } else if (response.statusCode() == 401) {
+                // 401 = Unauthorized (Wrong password/email)
                 JOptionPane.showMessageDialog(this,
                     "Incorrect email or password.",
                     "Login Failed",
                     JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-            //on sucess
-            
-            //show sucess message
-            JOptionPane.showMessageDialog(this,
-                    "Login successful!",
-                    "Welcome",
-                    JOptionPane.INFORMATION_MESSAGE);
-
-            } catch (Exception ex) {
-                ex.printStackTrace();
+            } else {
+                // Other server error
                 JOptionPane.showMessageDialog(this,
-                    "Error reading users file: " + ex.getMessage(),
-                    "File Error",
+                    "Server error: " + response.statusCode(),
+                    "Login Failed",
                     JOptionPane.ERROR_MESSAGE);
             }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this,
+                "Error connecting to server: " + ex.getMessage() +
+                "\n\n(Is the Springboot server running?)",
+                "Connection Error",
+                JOptionPane.ERROR_MESSAGE);
+        }
     }
 
     /**
@@ -133,7 +138,7 @@ public class LoginFrame extends JFrame {
         gcField.gridx = 1; gcField.gridy = row; gcField.weightx = 1.0; gcField.gridwidth = 1;
         panel.add(field, gcField);
     }
-    //method to activate opening signup  widnow
+    //method to activate opening signup widnow
     private void openSignupPage() {
         SwingUtilities.invokeLater(() -> {
             dispose(); // close login window
