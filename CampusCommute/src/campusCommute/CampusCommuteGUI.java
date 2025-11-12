@@ -114,7 +114,7 @@ public class CampusCommuteGUI extends JFrame {
 		addRideButton.addActionListener(e -> addRide());
 	}
 	
-	/**
+	/**u
 	 * Handles adding a new ride to the list.
 	 * Reads input values, validates them, creates a new Ride, and updates the display.
 	 */

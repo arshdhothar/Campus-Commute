@@ -1,5 +1,6 @@
 package campusCommute;
 
+//Add these lines with your other imports
 import java.awt.EventQueue;
 
 import javax.swing.JFrame;
