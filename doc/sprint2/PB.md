@@ -3,16 +3,71 @@
 
 ## In Progress 🔄️
 
-### User Story 3: Safety and Verification
+### User Story 3: User Session Persistence (Sahil)
 
-As a university admin staff , I want to ensure that only verified members of the university community can use the app, so that rides remain safe, secure, and only for trusted users.
+As a user, I want the application to remember my identity after I log in, so that I can update my profile, post rides, or add emergency contacts without having to re-enter my email for every action.
 
 Acceptance Criteria:
 
-* All users must register using their official university email or ID.
-* Drivers must upload a valid driver’s license and vehicle info for verification.
-* Unverified users cannot post or request rides.
-* Admin dashboard shows verification status of users and vehicles.
+* A `CurrentUser` class exists to store the logged-in `Person` object globally.
+* Upon a successful 200 OK login response, the system parses the JSON user data and saves it to the session.
+* Features like "Update Emergency Contact" can automatically retrieve the logged-in user's email from the session.
+* The application prevents access to secured pages if the `CurrentUser` session is null (not logged in).
+
+### User Story 7: Emergency Assistance Button (Ibrahim)
+
+As a passenger or driver, I want to have access to an emergency button during rides so that I can quickly request for help if I feel unsafe or have an issue.
+
+Acceptance Criteria: 
+
+* The ride screen includes an emergency button visible at all times.
+* Pressing the button instantly shares the ride’s live location with emergency contacts.
+* The user can customize their emergency contacts.
+
+### User Story 8: Ride History (Zack)
+
+As a passenger or driver, I want to view past rides so that I can keep track of my travel history as well as expenses. Moreover I can track my commuting habits and manage my schedule efficiently.
+
+Acceptance Criteria:
+
+* The ride history tab displays previous rides with the date available.
+* Each ride includes an option to view or download a receipt.
+* Only completed rides appear in the history tab.
+
+### User Story 9: Profile Customization (Arsh)
+
+As a user, I want to be able to add a picture and a short bio to my profile so that other people can recognize me and feel more comfortable sharing rides.
+
+Acceptance Criteria:
+
+* I can upload a profile photo and write a short description about myself.
+* My profile can show small badges like “Verified Driver” or “Top Passenger.”
+* I can change or hide my info whenever I want.
+* The app should flag any inappropriate photos or text.
+
+### User Story 15 - Notification Preferences (Zack)
+
+As a user, I want to customize what notifications I receive so that I’m only alerted about important events.
+
+Acceptance Criteria:
+
+*Users can toggle on/off ride confirmations, cancellations, and reminders.
+*Notification settings are saved in the user profile.
+*System respects user preferences when sending alerts.
+
+### User Story 17 - Emergency Contact Information (Sahil)
+
+As a user, I want to save an emergency contact so that the system can notify someone if there’s an emergency during my ride.
+
+Acceptance Criteria:
+
+* Users can add/edit one emergency contact in their profile.
+* Contact info is securely stored.
+* Can be viewed by admin or safety system during emergency events.
+
+___
+
+## Unassigned 📥
 
 ### User Story 4: Ratings and Feedback System
 
@@ -35,61 +90,6 @@ Acceptance Criteria:
 * An in-app chat is available between matched drivers and passengers.
 * Users receive notifications for new messages, ride requests, and confirmations.
 * Drivers can notify all passengers of delays or route changes.
-
-### User Story 7: Emergency Assistance Button  
-
-As a passenger or driver, I want to have access to an emergency button during rides so that I can quickly request for help if I feel unsafe or have an issue.
-
-Acceptance Criteria: 
-
-* The ride screen includes an emergency button visible at all times.
-* Pressing the button instantly shares the ride’s live location with emergency contacts.
-* The user can customize their emergency contacts.
-
-### User Story 8: Ride History
-
-As a passenger or driver, I want to view past rides so that I can keep track of my travel history as well as expenses. Moreover I can track my commuting habits and manage my schedule efficiently.
-
-Acceptance Criteria:
-
-* The ride history tab displays previous rides with the date available.
-* Each ride includes an option to view or download a receipt.
-* Only completed rides appear in the history tab.
-
-### User Story 9: Profile Customization
-
-As a user, I want to be able to add a picture and a short bio to my profile so that other people can recognize me and feel more comfortable sharing rides.
-
-Acceptance Criteria:
-
-* I can upload a profile photo and write a short description about myself.
-* My profile can show small badges like “Verified Driver” or “Top Passenger.”
-* I can change or hide my info whenever I want.
-* The app should flag any inappropriate photos or text.
-
-### User Story 16 - Lost & Found Reporting
-
-As a rider or driver, I want to report lost items after a trip so that they can be returned to the rightful owner.
-
-Acceptance Criteria:
-
-* Post-ride “Report Lost Item” option available.
-* Reports include ride details, contact method, and item description.
-* Notifications sent to the other participant (driver/rider).
-
-### User Story 17 - Emergency Contact Information
-
-As a user, I want to save an emergency contact so that the system can notify someone if there’s an emergency during my ride.
-
-Acceptance Criteria:
-
-* Users can add/edit one emergency contact in their profile.
-* Contact info is securely stored.
-* Can be viewed by admin or safety system during emergency events.
-
-___
-
-## Unassigned 📥
 
 ### User Story 6: Payment
 
@@ -156,15 +156,15 @@ Acceptance Criteria:
 * Cancellation notifies the driver immediately.
 * Repeated last-minute cancellations trigger a warning.
 
-### User Story 15 - Notification Preferences
+### User Story 16 - Lost & Found Reporting
 
-As a user, I want to customize what notifications I receive so that I’m only alerted about important events.
+As a rider or driver, I want to report lost items after a trip so that they can be returned to the rightful owner.
 
 Acceptance Criteria:
 
-*Users can toggle on/off ride confirmations, cancellations, and reminders.
-*Notification settings are saved in the user profile.
-*System respects user preferences when sending alerts.
+* Post-ride “Report Lost Item” option available.
+* Reports include ride details, contact method, and item description.
+* Notifications sent to the other participant (driver/rider).
 
 ### User Story 18 - Reward & Points System
 
