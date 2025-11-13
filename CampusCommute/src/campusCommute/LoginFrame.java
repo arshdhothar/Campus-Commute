@@ -96,7 +96,6 @@ public class LoginFrame extends JFrame {
             	
             	Person userFromDb = gson.fromJson(response.body(), Person.class);
             	CurrentUser.loggedInUser = userFromDb;
-            	System.out.println("User Story 3 Success: Session stored for " + CurrentUser.loggedInUser.getEmail());
             	
                 JOptionPane.showMessageDialog(this,
                         "Login successful!",
