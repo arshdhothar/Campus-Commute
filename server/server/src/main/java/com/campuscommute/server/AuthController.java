@@ -39,4 +39,39 @@ public class AuthController {
         }
     }
 
+    // --- THIS IS THE NEW METHOD YOU ASKED FOR ---
+    
+    /**
+     * Handles updating a user's profile information.
+     * Finds the user by ID and updates their bio and photo path.
+     */
+    @PostMapping("/api/profile/update")
+    public ResponseEntity<Person> updateProfile(@RequestBody Person updatedPerson) {
+        
+        // Find the *existing* person from the database using the ID from the request
+        Person existingPerson = personRepository.findById(updatedPerson.getID()).orElse(null);
+
+        // Check if the user actually exists
+        if (existingPerson != null) {
+            
+            // Update the fields on the *existing* person object
+            existingPerson.setBio(updatedPerson.getBio());
+            existingPerson.setPhotoPath(updatedPerson.getPhotoPath());
+            // In the future, you can add:
+            // existingPerson.setEmergencyContactName(updatedPerson.getEmergencyContactName());
+            // existingPerson.setEmergencyContactPhone(updatedPerson.getEmergencyContactPhone());
+
+            // Save the updated object back to the database
+            Person savedPerson = personRepository.save(existingPerson);
+            
+            System.out.println("SUCCESS: Profile updated for: " + savedPerson.getEmail());
+            
+            // Send the fully updated person back to the frontend
+            return ResponseEntity.ok(savedPerson); 
+        } else {
+            // Couldn't find a user with the ID provided
+            System.out.println("FAILURE: Could not find user to update with ID: " + updatedPerson.getID());
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }

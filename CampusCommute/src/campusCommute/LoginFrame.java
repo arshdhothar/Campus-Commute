@@ -7,6 +7,7 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import javax.swing.*;
 import java.awt.*;
+
 /**
  * This class handles the login part of the application, checks if the user is in the database before logging in, uses signup, and userdatamanager classes
  */
@@ -16,6 +17,10 @@ public class LoginFrame extends JFrame {
     private final JPasswordField passwordField = new JPasswordField(20);
     private final JButton loginButton = new JButton("Login");
     private final JButton signupButton = new JButton("Go to Sign Up");
+
+    // --- We need these for the network request ---
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final Gson gson = new Gson();
 
     public LoginFrame() {
     	//name window
@@ -35,83 +40,80 @@ public class LoginFrame extends JFrame {
         GridBagConstraints gcBtn = (GridBagConstraints) base.clone();
         gcBtn.gridx = 0; gcBtn.gridy = row; gcBtn.gridwidth = 2;
         gcBtn.weightx = 1.0; gcBtn.anchor = GridBagConstraints.CENTER;
-
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        btnPanel.add(loginButton);
-        btnPanel.add(signupButton);
-        form.add(btnPanel, gcBtn);
-
-        //login button goes to the method that validates login
-        loginButton.addActionListener(e -> validateAndMaybeLogin());
         
-        //signup button goes to to the signup opening method
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 15, 0));
+        buttonPanel.add(loginButton);
+        buttonPanel.add(signupButton);
+        form.add(buttonPanel, gcBtn);
+
+        //add listeners
+        loginButton.addActionListener(e -> performLogin());
         signupButton.addActionListener(e -> openSignupPage());
 
         setContentPane(form);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
-        setMinimumSize(new Dimension(400, getHeight()));
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-    /**
-     * Helper method to validate login information
-     */
-    private void validateAndMaybeLogin() {
-        // --- 1. Your original validation ---
-        emailField.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
-        passwordField.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
-        String email = emailField.getText().trim();
-        String pass  = new String(passwordField.getPassword()).trim();
 
-        if (email.isEmpty() || pass.isEmpty()) {
-            if (email.isEmpty()) emailField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            if (pass.isEmpty()) passwordField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            JOptionPane.showMessageDialog(this, "Please enter both email and password.", "Missing Information", JOptionPane.WARNING_MESSAGE);
+    /**
+     * This is the main login logic method.
+     */
+    private void performLogin() {
+        String email = emailField.getText();
+        String password = new String(passwordField.getPassword());
+
+        if (email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Email and Password are required.", "Input Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
-        // --- 2. The new networking part ---
+        // 1. Create LoginRequest object and convert to JSON
+        LoginRequest loginRequest = new LoginRequest(email, password);
+        String jsonBody = gson.toJson(loginRequest);
+
+        // 2. Build the HTTP Request
+        HttpRequest request = HttpRequest.newBuilder()
+                .uri(URI.create("http://localhost:8080/api/login"))
+                .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                .header("Content-Type", "application/json")
+                .build();
+
         try {
-            // 1. Create the LoginRequest object
-            LoginRequest loginData = new LoginRequest(email, pass);
+            // 3. Send the request and get response
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // 2. Convert it to JSON
-            Gson gson = new Gson();
-            String jsonRequestBody = gson.toJson(loginData);
-
-            // 3. Create the client and request
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("http://localhost:8080/api/login")) // The new login endpoint
-                    .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody))
-                    .build();
-
-            // 4. Send the request
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            // 5. Check the response code!
+            // 4. Handle the response
             if (response.statusCode() == 200) {
-                // 200 = OK (Success!)
-            	
-            	Person userFromDb = gson.fromJson(response.body(), Person.class);
-            	CurrentUser.loggedInUser = userFromDb;
-            	
-                JOptionPane.showMessageDialog(this,
-                        "Login successful!",
-                        "Welcome",
-                        JOptionPane.INFORMATION_MESSAGE);
+                // SUCCESS!
+                // Convert the JSON response (which is a full Person) into our Person object
+                Person loggedInPerson = gson.fromJson(response.body(), Person.class);
+                
+                // Store this person as the globally logged-in user
+                CurrentUser.loggedInUser = loggedInPerson;
+
+                JOptionPane.showMessageDialog(this, "Login Successful! Welcome, " + loggedInPerson.getfName() + ".");
+                dispose(); // Close the login window
+
+                // --- THIS IS THE NEW CODE YOU ASKED FOR ---
+                // After closing, open the ProfileCustomizationGUI
+                // We pass the logged-in user to its constructor
+                SwingUtilities.invokeLater(() -> {
+                    new ProfileCustomizationGUI(CurrentUser.loggedInUser);
+                });
+                // ------------------------------------------
+
             } else if (response.statusCode() == 401) {
-                // 401 = Unauthorized (Wrong password/email)
+                // Unauthorized
                 JOptionPane.showMessageDialog(this,
-                    "Incorrect email or password.",
-                    "Login Failed",
+                    "Login Failed: Invalid email or password.",
+                    "Login Error",
                     JOptionPane.ERROR_MESSAGE);
             } else {
-                // Other server error
+                // Other server errors
                 JOptionPane.showMessageDialog(this,
-                    "Server error: " + response.statusCode(),
-                    "Login Failed",
+                    "Login Failed: Server error (Code: " + response.statusCode() + ")",
+                    "Login Error",
                     JOptionPane.ERROR_MESSAGE);
             }
 
@@ -119,7 +121,7 @@ public class LoginFrame extends JFrame {
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this,
                 "Error connecting to server: " + ex.getMessage() +
-                "\n\n(Is the Springboot server running?)",
+                "\n\n(Is the Spring Boot server running?)",
                 "Connection Error",
                 JOptionPane.ERROR_MESSAGE);
         }
@@ -142,6 +144,7 @@ public class LoginFrame extends JFrame {
         gcField.gridx = 1; gcField.gridy = row; gcField.weightx = 1.0; gcField.gridwidth = 1;
         panel.add(field, gcField);
     }
+    
     //method to activate opening signup widnow
     private void openSignupPage() {
         SwingUtilities.invokeLater(() -> {
