@@ -93,6 +93,10 @@ public class LoginFrame extends JFrame {
             // 5. Check the response code!
             if (response.statusCode() == 200) {
                 // 200 = OK (Success!)
+            	
+            	Person userFromDb = gson.fromJson(response.body(), Person.class);
+            	CurrentUser.loggedInUser = userFromDb;
+            	
                 JOptionPane.showMessageDialog(this,
                         "Login successful!",
                         "Welcome",

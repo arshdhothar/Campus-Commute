@@ -14,6 +14,7 @@ public class Person {
 	private Long ID; // <-- ADD THIS: Databases need a numeric primary key
 
 	private String email, phone, fName, lName, DOB, password, address, userType;
+	private String emergencyContactName, emergencyContactPhone;
 
 	// A default constructor is required by JPA
 	public Person() {
@@ -99,5 +100,33 @@ public class Person {
 
 	public void setUserType(String userType) {
 		this.userType = userType;
+	}
+
+	/**
+	 * @return the emergencyContactName
+	 */
+	public String getEmergencyContactName() {
+		return emergencyContactName;
+	}
+
+	/**
+	 * @param emergencyContactName the emergencyContactName to set
+	 */
+	public void setEmergencyContactName(String emergencyContactName) {
+		this.emergencyContactName = emergencyContactName;
+	}
+
+	/**
+	 * @return the emergencyContactPhone
+	 */
+	public String getEmergencyContactPhone() {
+		return emergencyContactPhone;
+	}
+
+	/**
+	 * @param emergencyContactPhone the emergencyContactPhone to set
+	 */
+	public void setEmergencyContactPhone(String emergencyContactPhone) {
+		this.emergencyContactPhone = emergencyContactPhone;
 	}
 }
