@@ -17,7 +17,7 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 |------|------|----------------|
 | Zack Nayar | Product Owner | 14 |
 | Arsh Dhothar | Scrum Master | 14 |
-| Sahil Panchal | Developer | 15 |
+| Sahil Panchal | Developer | 18 |
 | Ibrahim Khalil | Developer | 12 |
 | Alp Duras | Developer | 14 |
 
@@ -44,10 +44,6 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 ---
 
 ### **Alp**  
-- Implement and test **User Story 3** – Account Creation and Login.  
-- Create a `User` class (name, email, password).  
-- Add signup and login panels in Swing.  
-- Save user info locally or to backend once integrated.  
 - Update related CRC card after completing implementation.  
 - Post minimum 3 standups.  
 
@@ -63,9 +59,11 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 
 ### **Sahil**  
 - Update and **`PB.md`** (Product Backlog) with new/unfinished stories.  
-- Work on backend integration (Spring Boot + MySQL).   
+- Work on setting up the backend via Sprin Boot + MySQL so the team can develop off it
+- Work on backend integration for US20/Backend-Integration (Spring Boot + MySQL).
+- Implement and test **User Story 17**.  
 - Post minimum 3 standups. 
-- Update CRC cards and System Design document after completion. 
+- Update CRC cards and System Design document after completion.
 
 ---
 
