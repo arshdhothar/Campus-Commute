@@ -77,6 +77,16 @@ Acceptance Criteria:
 * Reports include ride details, contact method, and item description.
 * Notifications sent to the other participant (driver/rider).
 
+### User Story 17 - Emergency Contact Information
+
+As a user, I want to save an emergency contact so that the system can notify someone if there’s an emergency during my ride.
+
+Acceptance Criteria:
+
+* Users can add/edit one emergency contact in their profile.
+* Contact info is securely stored.
+* Can be viewed by admin or safety system during emergency events.
+
 ___
 
 ## Unassigned 📥
@@ -155,16 +165,6 @@ Acceptance Criteria:
 *Users can toggle on/off ride confirmations, cancellations, and reminders.
 *Notification settings are saved in the user profile.
 *System respects user preferences when sending alerts.
-
-### User Story 17 - Emergency Contact Information
-
-As a user, I want to save an emergency contact so that the system can notify someone if there’s an emergency during my ride.
-
-Acceptance Criteria:
-
-* Users can add/edit one emergency contact in their profile.
-* Contact info is securely stored.
-* Can be viewed by admin or safety system during emergency events.
 
 ### User Story 18 - Reward & Points System
 
