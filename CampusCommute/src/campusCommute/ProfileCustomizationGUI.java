@@ -16,14 +16,10 @@ public class ProfileCustomizationGUI extends JFrame {
     private JTextArea bioTextArea;
     private JLabel photoLabel;
     private JButton uploadButton, saveButton;
-    
-    // --- NEW BUTTON ---
     private JButton emergencyContactButton; 
-    
-    // --- THIS IS THE LOGGED-IN USER ---
     private Person currentUser;
     
-    // --- HTTP CLIENT FOR NETWORKING ---
+    // HTTP client for networking
     private final HttpClient httpClient = HttpClient.newHttpClient();
     private final Gson gson = new Gson();
 
@@ -150,14 +146,12 @@ public class ProfileCustomizationGUI extends JFrame {
 
             // 5. Handle the server's response
             if (response.statusCode() == 200) {
-                // SUCCESS!
                 // The server sends back the updated person. We update our global user.
                 CurrentUser.loggedInUser = gson.fromJson(response.body(), Person.class);
                 
                 JOptionPane.showMessageDialog(this, "Profile saved successfully!");
                 dispose(); // Close the profile window
             } else {
-                // FAILURE
                 JOptionPane.showMessageDialog(this,
                         "Error saving profile. Server responded with: " + response.statusCode(),
                         "Save Error",

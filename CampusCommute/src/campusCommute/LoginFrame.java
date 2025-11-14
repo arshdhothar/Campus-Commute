@@ -68,11 +68,11 @@ public class LoginFrame extends JFrame {
             return;
         }
 
-        // 1. Create LoginRequest object and convert to JSON
+        // Create LoginRequest object and convert to JSON
         LoginRequest loginRequest = new LoginRequest(email, password);
         String jsonBody = gson.toJson(loginRequest);
 
-        // 2. Build the HTTP Request
+        // Build the HTTP Request
         HttpRequest request = HttpRequest.newBuilder()
                 .uri(URI.create("http://localhost:8080/api/login"))
                 .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
@@ -80,12 +80,11 @@ public class LoginFrame extends JFrame {
                 .build();
 
         try {
-            // 3. Send the request and get response
+            // Send the request and get response
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // 4. Handle the response
+            // Handle the response
             if (response.statusCode() == 200) {
-                // SUCCESS!
                 // Convert the JSON response (which is a full Person) into our Person object
                 Person loggedInPerson = gson.fromJson(response.body(), Person.class);
                 
@@ -95,13 +94,11 @@ public class LoginFrame extends JFrame {
                 JOptionPane.showMessageDialog(this, "Login Successful! Welcome, " + loggedInPerson.getfName() + ".");
                 dispose(); // Close the login window
 
-                // --- THIS IS THE NEW CODE YOU ASKED FOR ---
                 // After closing, open the ProfileCustomizationGUI
                 // We pass the logged-in user to its constructor
                 SwingUtilities.invokeLater(() -> {
                     new ProfileCustomizationGUI(CurrentUser.loggedInUser);
                 });
-                // ------------------------------------------
 
             } else if (response.statusCode() == 401) {
                 // Unauthorized
