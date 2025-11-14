@@ -66,8 +66,8 @@ public class Person {
 		return DOB;
 	}
 
-	public void setDOB(String dOB) {
-		DOB = dOB;
+	public void setDOB(String DOB) {
+		this.DOB = DOB;
 	}
 
 	public String getPassword() {

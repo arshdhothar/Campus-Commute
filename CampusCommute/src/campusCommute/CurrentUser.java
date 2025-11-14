@@ -2,5 +2,5 @@ package campusCommute;
 
 public class CurrentUser {
 
-	public static Person loggedInUser = null;
+	public static Person loggedInUser = null;;
 }

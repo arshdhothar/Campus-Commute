@@ -4,6 +4,7 @@ public class Person {
 
 	private Long ID; 
 	private String email, phone, fName, lName, DOB, password, address, userType;
+	private String emergencyContactName, emergencyContactPhone;
 
 	public Person() {
 		
@@ -87,4 +88,20 @@ public class Person {
 	public void setUserType(String userType) {
 		this.userType = userType;
 	}
+	
+	public String getEmergencyContactName() {
+        return emergencyContactName;
+    }
+
+    public void setEmergencyContactName(String emergencyContactName) {
+        this.emergencyContactName = emergencyContactName;
+    }
+
+    public String getEmergencyContactPhone() {
+        return emergencyContactPhone;
+    }
+
+    public void setEmergencyContactPhone(String emergencyContactPhone) {
+        this.emergencyContactPhone = emergencyContactPhone;
+    }
 }
