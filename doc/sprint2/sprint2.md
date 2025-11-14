@@ -51,7 +51,8 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 
 ### **Arsh**  
 - Prepare and submit **`burndown.pdf`** (Trello chart + velocity comments).  
-- Implement and test **User Story 4**.   
+- Implement and test **User Story 9**.   
+- Implement and test **User Story 10**.
 - Post minimum 3 standups.
 - Update related CRC card after completing implementation.
 
@@ -59,7 +60,7 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 
 ### **Sahil**  
 - Update and **`PB.md`** (Product Backlog) with new/unfinished stories.  
-- Work on setting up the backend via Sprin Boot + MySQL so the team can develop off it
+- Work on setting up the backend via Spring Boot + MySQL so the team can develop off it
 - Work on backend integration for US20/Backend-Integration (Spring Boot + MySQL).
 - Implement and test **User Story 17**.  
 - Post minimum 3 standups. 
