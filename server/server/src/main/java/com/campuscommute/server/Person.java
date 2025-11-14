@@ -1,20 +1,25 @@
 package com.campuscommute.server;
 
-// Import these new files
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Column;
 
-@Entity // <-- ADD THIS: Tells Spring this class is a database table
+@Entity
 public class Person {
 
-	@Id // <-- ADD THIS: Marks this field as the primary key
-	@GeneratedValue(strategy = GenerationType.IDENTITY) // <-- ADD THIS: Makes the DB auto-generate the ID
-	private Long ID; // <-- ADD THIS: Databases need a numeric primary key
+	@Id
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
+	private Long ID;
 
 	private String email, phone, fName, lName, DOB, password, address, userType;
 	private String emergencyContactName, emergencyContactPhone;
+
+	@Column(length = 1000)
+	private String bio;
+	
+	private String photoPath;
 
 	// A default constructor is required by JPA
 	public Person() {
@@ -32,10 +37,14 @@ public class Person {
 		this.userType = userType;
 	}
 
-	// getter and setters for class
+	// Getters and setters
 
 	public Long getID() {
 		return ID;
+	}
+
+	public void setID(Long ID) {
+		this.ID = ID;
 	}
 
 	public String getEmail() {
@@ -102,31 +111,35 @@ public class Person {
 		this.userType = userType;
 	}
 
-	/**
-	 * @return the emergencyContactName
-	 */
 	public String getEmergencyContactName() {
 		return emergencyContactName;
 	}
 
-	/**
-	 * @param emergencyContactName the emergencyContactName to set
-	 */
 	public void setEmergencyContactName(String emergencyContactName) {
 		this.emergencyContactName = emergencyContactName;
 	}
 
-	/**
-	 * @return the emergencyContactPhone
-	 */
 	public String getEmergencyContactPhone() {
 		return emergencyContactPhone;
 	}
 
-	/**
-	 * @param emergencyContactPhone the emergencyContactPhone to set
-	 */
 	public void setEmergencyContactPhone(String emergencyContactPhone) {
 		this.emergencyContactPhone = emergencyContactPhone;
+	}
+
+	public String getBio() {
+		return bio;
+	}
+
+	public void setBio(String bio) {
+		this.bio = bio;
+	}
+
+	public String getPhotoPath() {
+		return photoPath;
+	}
+
+	public void setPhotoPath(String photoPath) {
+		this.photoPath = photoPath;
 	}
 }
