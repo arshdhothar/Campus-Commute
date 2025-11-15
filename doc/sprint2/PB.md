@@ -65,6 +65,17 @@ Acceptance Criteria:
 * Contact info is securely stored.
 * Can be viewed by admin or safety system during emergency events.
 
+### User Story 21 - DriverGUI (Zack)
+
+As a driver,  I want a screen where I can see all my rides and the requests for each ride, so that I can quickly review and accept passengers without confusion.
+
+Acceptance Criteria:
+
+*DriverGUI shows a list of rides created by the logged-in driver.
+*Selecting a ride displays its passenger requests.
+*An “Accept Request” button is available and triggers the backend accept API.
+
+
 ___
 
 ## Unassigned 📥
