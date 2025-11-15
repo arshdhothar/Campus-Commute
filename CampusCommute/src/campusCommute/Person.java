@@ -11,6 +11,9 @@ public class Person {
     private String password;
     private String address;
     private String userType;
+    private boolean notifyConfirmations = true;
+    private boolean notifyCancellations = true;
+    private boolean notifyReminders = true;
 
     // Fields needed for profile customization
     private String bio;
@@ -65,4 +68,19 @@ public class Person {
     public void setUserType(String userType) { this.userType = userType; }
     public void setBio(String bio) { this.bio = bio; }
     public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
+    
+    public boolean isNotifyConfirmations() { return notifyConfirmations; }
+    public void setNotifyConfirmations(boolean notifyConfirmations) {
+        this.notifyConfirmations = notifyConfirmations;
+    }
+
+    public boolean isNotifyCancellations() { return notifyCancellations; }
+    public void setNotifyCancellations(boolean notifyCancellations) {
+        this.notifyCancellations = notifyCancellations;
+    }
+
+    public boolean isNotifyReminders() { return notifyReminders; }
+    public void setNotifyReminders(boolean notifyReminders) {
+        this.notifyReminders = notifyReminders;
+    }
 }

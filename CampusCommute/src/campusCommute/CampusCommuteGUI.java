@@ -22,6 +22,8 @@ import com.google.gson.Gson;
  * This version CONNECTS TO BACKEND.
  * - Posts rides to MySQL (via Spring Boot)
  * - Loads rides from backend on startup
+ *
+ * --- REWRITTEN WITH ALL FIXES ---
  */
 public class CampusCommuteGUI extends JFrame {
 
@@ -43,6 +45,8 @@ public class CampusCommuteGUI extends JFrame {
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
+                // This main method is for testing only.
+                // You must log in via LoginFrame for the app to work.
                 CampusCommuteGUI frame = new CampusCommuteGUI();
                 frame.setVisible(true);
             } catch (Exception e) {
@@ -55,10 +59,24 @@ public class CampusCommuteGUI extends JFrame {
      * Constructor — sets up UI and loads rides from backend
      */
     public CampusCommuteGUI() {
-    	
+
+        // --- FIX 1: ADDED LOGIN CHECK ---
+        // This prevents a crash if the window is opened without a user.
+        if (CurrentUser.loggedInUser == null) {
+            JOptionPane.showMessageDialog(this,
+                    "You must be logged in to post a ride.",
+                    "Login Required",
+                    JOptionPane.ERROR_MESSAGE);
+            dispose(); // Close this window
+            return;    // Stop running the rest of the constructor
+        }
+        // --- END OF FIX ---
+
         // Frame settings
         setTitle("Campus Commute — Driver Console");
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // --- FIX 2: CHANGED TO DISPOSE_ON_CLOSE ---
+        // This stops this window from shutting down the whole app.
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(700, 500);
         setLocationRelativeTo(null);
 
@@ -128,6 +146,9 @@ public class CampusCommuteGUI extends JFrame {
 
         // LOAD RIDES FROM SERVER
         loadRidesFromBackend();
+
+        // Set visible *last* after adding the login check
+        setVisible(true);
     }
 
     /**
@@ -140,9 +161,9 @@ public class CampusCommuteGUI extends JFrame {
             String time = timeField.getText().trim();
             int seats = Integer.parseInt(seatsField.getText().trim());
             double price = Double.parseDouble(priceField.getText().trim());
-            
-         // 1. Get the logged-in user's ID (this is now safe)
-            long driverId = CurrentUser.loggedInUser.getID();
+
+            // 1. Get the logged-in user's ID (this is now safe)
+            Long driverId = CurrentUser.loggedInUser.getID();
 
             // 2. Create the ride
             Ride ride = new Ride(start, dest, time, seats, price);
@@ -172,6 +193,8 @@ public class CampusCommuteGUI extends JFrame {
             seatsField.setText("");
             priceField.setText("");
 
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Seats must be a number and Price must be a decimal.", "Input Error", JOptionPane.ERROR_MESSAGE);
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error posting ride: " + ex.getMessage());
             ex.printStackTrace();
@@ -213,6 +236,7 @@ public class CampusCommuteGUI extends JFrame {
      * Open backend-synced Driver Panel
      */
     private void openDriverPanel() {
-        SwingUtilities.invokeLater(() -> new DriverGUI()); // UPDATED ✔
+        // This will now correctly open the DriverGUI
+        SwingUtilities.invokeLater(() -> new DriverGUI());
     }
 }
