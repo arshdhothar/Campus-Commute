@@ -33,6 +33,16 @@ public class DriverGUI extends JFrame {
     private final Gson gson = new Gson();
 
     public DriverGUI() {
+    	
+    	
+    	if (CurrentUser.loggedInUser == null) {
+            JOptionPane.showMessageDialog(this,
+                    "You must be logged in to view the Driver Panel.",
+                    "Login Required",
+                    JOptionPane.ERROR_MESSAGE);
+            dispose(); // Close this broken window
+            return;    // Stop running the rest of the constructor
+        }
 
         setTitle("Driver Panel");
         setSize(800, 520);
@@ -106,7 +116,12 @@ public class DriverGUI extends JFrame {
     // ========================================================
     private void loadDriverRides() {
         try {
-            URL url = new URL("http://localhost:8080/api/rides");
+            // 1. Get the ID (this is now safe because of the constructor check)
+            long driverId = CurrentUser.loggedInUser.getID();
+
+            // 2. Use the correct, specific API endpoint from your RideController
+            URL url = new URL("http://localhost:8080/api/rides/driver/" + driverId);
+            
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
@@ -115,25 +130,24 @@ public class DriverGUI extends JFrame {
             String json = reader.lines().collect(Collectors.joining());
             reader.close();
 
-            Ride[] allRides = gson.fromJson(json, Ride[].class);
+            // 3. The JSON now *only* contains this driver's rides
+            Ride[] rides = gson.fromJson(json, Ride[].class);
+            
             driverRides.clear();
             rideListModel.clear();
 
-            long driverId = CurrentUser.loggedInUser.getID();
-
-            for (Ride r : allRides) {
-                if (r.getDriverId() != null && r.getDriverId().equals(driverId)) {
-                    driverRides.add(r);
-                    rideListModel.addElement(r.toString());
-                }
+            // 4. No more "if" filter needed! Just add all of them.
+            for (Ride r : rides) {
+                driverRides.add(r);
+                rideListModel.addElement(r.toString());
             }
 
         } catch (Exception e) {
+            // This will still catch server errors, which is good.
             JOptionPane.showMessageDialog(this, "Error loading rides.");
+            e.printStackTrace(); // Helps you debug
         }
-    }
-
-    // ========================================================
+    }    // ========================================================
     // LOAD REQUESTS FOR SELECTED RIDE
     // ========================================================
     private void loadRequestsForSelectedRide() {

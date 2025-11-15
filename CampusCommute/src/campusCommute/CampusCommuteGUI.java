@@ -55,7 +55,7 @@ public class CampusCommuteGUI extends JFrame {
      * Constructor — sets up UI and loads rides from backend
      */
     public CampusCommuteGUI() {
-
+    	
         // Frame settings
         setTitle("Campus Commute — Driver Console");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -140,8 +140,15 @@ public class CampusCommuteGUI extends JFrame {
             String time = timeField.getText().trim();
             int seats = Integer.parseInt(seatsField.getText().trim());
             double price = Double.parseDouble(priceField.getText().trim());
+            
+         // 1. Get the logged-in user's ID (this is now safe)
+            long driverId = CurrentUser.loggedInUser.getID();
 
+            // 2. Create the ride
             Ride ride = new Ride(start, dest, time, seats, price);
+
+            // 3. SET THE DRIVER ID on the ride object
+            ride.setDriverId(driverId);
 
             String json = gson.toJson(ride);
 

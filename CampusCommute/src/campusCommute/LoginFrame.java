@@ -12,10 +12,10 @@ import java.awt.*;
  * LoginFrame
  *
  * Fully backend-synced login:
- *  - Sends email/password to backend
- *  - Receives full Person object
- *  - Stores in CurrentUser.loggedInUser
- *  - Opens correct GUI based on userType
+ * - Sends email/password to backend
+ * - Receives full Person object
+ * - Stores in CurrentUser.loggedInUser
+ * - Opens correct GUI based on userType
  */
 public class LoginFrame extends JFrame {
 
@@ -98,10 +98,13 @@ public class LoginFrame extends JFrame {
             // OPEN APPROPRIATE GUI
             if (loggedIn.getUserType().equalsIgnoreCase("driver")) {
                 new DriverGUI();
+                new CampusCommuteGUI(); // <-- ADDED: Opens the ride posting window
+                
             } else if (loggedIn.getUserType().equalsIgnoreCase("user")) {
                 new PassengerGUI();
+                
             } else {
-                // both
+                // "both" userType
                 Object choice = JOptionPane.showInputDialog(
                         this,
                         "Choose mode:",
@@ -112,8 +115,12 @@ public class LoginFrame extends JFrame {
                         "Passenger"
                 );
 
-                if ("Driver".equals(choice)) new DriverGUI();
-                else new PassengerGUI();
+                if ("Driver".equals(choice)) {
+                    new DriverGUI();
+                    new CampusCommuteGUI(); // <-- ADDED: Also opens posting window for "both"
+                } else {
+                    new PassengerGUI();
+                }
             }
 
         } catch (Exception ex) {
