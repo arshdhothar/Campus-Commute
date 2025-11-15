@@ -8,9 +8,9 @@ public class CurrentUser {
     /**
      * Safely returns the logged-in user's ID.
      */
-    public static long getId() {
+    public static Long getId() {
         if (loggedInUser == null) {
-            return -1;
+            return -1L;
         }
         return loggedInUser.getID();
     }

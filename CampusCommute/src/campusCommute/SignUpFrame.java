@@ -1,6 +1,6 @@
 package campusCommute;
 
-//Add these lines with your other imports
+// Add these lines with your other imports
 import com.google.gson.Gson;
 import java.net.URI;
 import java.net.http.HttpClient;
@@ -12,21 +12,28 @@ import java.awt.event.ActionEvent;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.time.format.ResolverStyle;
+
 /**
  * Frame for the signup window, uses person and datamanager class
+ * --- NOW WITH AUTO-LOGIN to profile customization ---
  */
 public class SignUpFrame extends JFrame {
-//creates text fields for signup fields
-    private final JTextField emailField   = new JTextField(20);
-    private final JTextField fNameField   = new JTextField(20);
-    private final JTextField lNameField   = new JTextField(20);
-    private final JTextField dobField     = new JTextField(10); // YYYY-MM-DD
-    private final JPasswordField passField= new JPasswordField(20);
-    private final JTextField phoneField   = new JTextField(15);
-    private final JTextField adressField  = new JTextField(25);
-    private final JComboBox<String> userTypeBox = new JComboBox<>(new String[] {"driver", "user", "both"});
+    // creates text fields for signup fields
+    private final JTextField emailField = new JTextField(20);
+    private final JTextField fNameField = new JTextField(20);
+    private final JTextField lNameField = new JTextField(20);
+    private final JTextField dobField = new JTextField(10); // YYYY-MM-DD
+    private final JPasswordField passField = new JPasswordField(20);
+    private final JTextField phoneField = new JTextField(15);
+    private final JTextField adressField = new JTextField(25);
+    private final JComboBox<String> userTypeBox = new JComboBox<>(new String[]{"driver", "user", "both"});
 
     private final JButton signUpBtn = new JButton("Sign Up");
+
+    // --- FIX: Declared as class fields ---
+    // Both handleSignUp and performAutoLogin can share these
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final Gson gson = new Gson();
 
     public SignUpFrame() {
         super("CampusCommute — Sign Up");
@@ -60,24 +67,25 @@ public class SignUpFrame extends JFrame {
         signUpBtn.addActionListener(this::handleSignUp);
 
         setContentPane(wrapWithPadding(form, 12));
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // --- FIX ---
+        // Was EXIT_ON_CLOSE, which kills the app. Should be DISPOSE_ON_CLOSE.
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         pack();
         setMinimumSize(new Dimension(460, getHeight()));
         setLocationRelativeTo(null);
     }
 
-    
+
     private void handleSignUp(ActionEvent evt) {
         // --- 1. This is all your original validation code ---
-        // (It's good code, we're keeping it)
-        String email   = emailField.getText().trim();
-        String fName   = fNameField.getText().trim();
-        String lName   = lNameField.getText().trim();
-        String dob     = dobField.getText().trim();
-        String pass    = new String(passField.getPassword()).trim();
-        String phone   = phoneField.getText().trim();
-        String adress  = adressField.getText().trim();
-        String userType= (String) userTypeBox.getSelectedItem();
+        String email = emailField.getText().trim();
+        String fName = fNameField.getText().trim();
+        String lName = lNameField.getText().trim();
+        String dob = dobField.getText().trim();
+        String pass = new String(passField.getPassword()).trim();
+        String phone = phoneField.getText().trim();
+        String adress = adressField.getText().trim();
+        String userType = (String) userTypeBox.getSelectedItem();
 
         if (email.isEmpty() || fName.isEmpty() || lName.isEmpty()
                 || dob.isEmpty() || pass.isEmpty() || phone.isEmpty()
@@ -89,7 +97,7 @@ public class SignUpFrame extends JFrame {
             return;
         }
 
-        // Add your other validation checks here too (like for date and phone)
+        // ... (other validation checks) ...
         if (!isValidDateYYYYMMDD(dob)) {
             JOptionPane.showMessageDialog(this,
                     "DOB must be in the format YYYY-MM-DD (e.g., 2001-02-28).",
@@ -104,74 +112,116 @@ public class SignUpFrame extends JFrame {
                     JOptionPane.ERROR_MESSAGE);
             return;
         }
-        
+
 
         // --- 2. This is the new networking part ---
         try {
             // Create the Person object just like before
-            // NOTE: Make sure your Person.java in this GUI project still has
-            // this constructor.
             Person p = new Person(
-                email, phone, fName, lName, dob, pass, adress, userType
+                    email, phone, fName, lName, dob, pass, adress, userType
             );
-            
-            // This is the new code that replaces UserDataManager.addUser(p)
 
-            // 1. Convert the Person object to a JSON string
-            Gson gson = new Gson();
+            // --- FIX: Use the class field 'gson'. Do not declare a new one. ---
             String jsonRequestBody = gson.toJson(p);
-
-            // 2. Create an HTTP client (the "phone")
-            HttpClient client = HttpClient.newHttpClient();
-
-            // 3. Create a request to send to your server (the "order")
+            
+            // --- FIX: Do not declare 'client' here. We will use the class field 'httpClient'. ---
+            
+            // Create a request to send to your server
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI("http://localhost:8080/api/signup")) // Your server's API endpoint
                     .header("Content-Type", "application/json") // Tell the server we're sending JSON
                     .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody)) // Send the JSON data
                     .build();
 
-            // 4. Send the request and get the response
-            // We're using send() for simplicity. It will "freeze" the GUI
-            // for a split second, which is fine for this project.
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            // --- FIX: Use the class field 'httpClient'. ---
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // 5. Check if the server said "OK" (HTTP code 200)
-            if (response.statusCode() == 200) {
+            // --- 3. MODIFIED SUCCESS BLOCK ---
+            if (response.statusCode() == 200 || response.statusCode() == 201) { // 201 is also "Created"
                 JOptionPane.showMessageDialog(this,
-                    "Sign-up successful! You can now log in.",
-                    "Account Created",
-                    JOptionPane.INFORMATION_MESSAGE);
-                
-                // Open the login window
-                SwingUtilities.invokeLater(() -> {
-                    dispose(); // closes this SignUpFrame
-                    new LoginFrame().setVisible(true); // opens login window
-                });
+                        "Sign-up successful! Logging you in to customize your profile...",
+                        "Account Created",
+                        JOptionPane.INFORMATION_MESSAGE);
+
+                // NOW, AUTOMATICALLY LOG THEM IN to get the new Person object
+                performAutoLogin(email, pass);
+
             } else {
                 // Show an error if the server failed
                 JOptionPane.showMessageDialog(this,
-                    "Sign-up failed. Server responded with: " + response.statusCode(),
-                    "Server Error",
-                    JOptionPane.ERROR_MESSAGE);
+                        "Sign-up failed. Server responded with: " + response.statusCode(),
+                        "Server Error",
+                        JOptionPane.ERROR_MESSAGE);
             }
 
         } catch (Exception ex) {
             // This catches network errors (like if the server is off)
             ex.printStackTrace();
             JOptionPane.showMessageDialog(this,
-                "Error during sign-up: " + ex.getMessage() + 
-                "\n\n(Did you remember to run the Springboot server?)",
-                "Connection Error",
-                JOptionPane.ERROR_MESSAGE);
+                    "Error during sign-up: " + ex.getMessage() +
+                            "\n\n(Did you remember to run the Springboot server?)",
+                    "Connection Error",
+                    JOptionPane.ERROR_MESSAGE);
+        }
+    }
+
+    /**
+     * --- NEW METHOD ---
+     * Performs an automatic login after signup to fetch the new user's
+     * full Person object (including their ID).
+     */
+    private void performAutoLogin(String email, String password) {
+        try {
+            // This assumes you have the LoginRequest.java file in your project
+            LoginRequest body = new LoginRequest(email, password);
+            
+            // --- FIX: Use the class field 'gson'. ---
+            String jsonBody = gson.toJson(body);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/login"))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .header("Content-Type", "application/json")
+                    .build();
+
+            // --- FIX: Use the class field 'httpClient'. ---
+            HttpResponse<String> response =
+                    httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                // Success! We got the new Person object
+                // --- FIX: Use the class field 'gson'. ---
+                Person loggedIn = gson.fromJson(response.body(), Person.class);
+                
+                // CRITICAL: Set the global user
+                CurrentUser.loggedInUser = loggedIn; 
+
+                // Close this signup frame
+                dispose(); 
+                
+                // Open the Profile Customization GUI
+                new ProfileCustomizationGUI(loggedIn).setVisible(true);
+
+            } else {
+                // This is a weird case (signup worked but login failed)
+                // Just send them to the login frame to be safe.
+                JOptionPane.showMessageDialog(this, "Account created, but auto-login failed. Please log in manually.");
+                dispose();
+                new LoginFrame().setVisible(true);
+            }
+
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error during auto-login: " + ex.getMessage());
+            // Send to login frame
+            dispose();
+            new LoginFrame().setVisible(true);
         }
     }
 
 
     /**
      * private helper method to validate if a given string is a valid date format
-     * @param s The string to check
-     * @return true if in correct format false otherwise
      */
     private boolean isValidDateYYYYMMDD(String s) {
         try {
@@ -184,14 +234,9 @@ public class SignUpFrame extends JFrame {
         }
     }
 
-  
+
     /**
-     * This method is used to shorten code when creating fields, it creates a field at the given field
-     * @param panel the panel we are using
-     * @param base base of the panel
-     * @param row the row number of the field
-     * @param label a label for the field
-     * @param field component object
+     * This method is used to shorten code when creating fields
      */
     private static void addRow(JPanel panel, GridBagConstraints base, int row, String label, JComponent field) {
         GridBagConstraints gcLabel = (GridBagConstraints) base.clone();
@@ -204,10 +249,7 @@ public class SignUpFrame extends JFrame {
     }
 
     /**
-     * padding method not used currently, might need later
-     * @param inner
-     * @param pad
-     * @return
+     * padding method
      */
     private static JComponent wrapWithPadding(JComponent inner, int pad) {
         JPanel outer = new JPanel(new BorderLayout());

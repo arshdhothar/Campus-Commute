@@ -2,7 +2,7 @@ package campusCommute;
 
 public class Person {
 
-    private long id;
+    private Long id;
     private String email;
     private String phone;
     private String fName;
@@ -38,7 +38,7 @@ public class Person {
     // --- GETTERS ---
     // These are needed to READ data from the object
 
-    public long getID() { return id; }
+    public Long getID() { return id; }
     public String getEmail() { return email; }
     public String getPhone() { return phone; }
     public String getfName() { return fName; }
@@ -54,7 +54,7 @@ public class Person {
     // These are needed for Gson to CREATE the object from JSON
     // and for your GUI to UPDATE the object's values
 
-    public void setID(long id) { this.id = id; }
+    public void setID(Long id) { this.id = id; }
     public void setEmail(String email) { this.email = email; }
     public void setPhone(String phone) { this.phone = phone; }
     public void setfName(String fName) { this.fName = fName; }

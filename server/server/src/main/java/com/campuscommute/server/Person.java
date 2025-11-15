@@ -142,4 +142,6 @@ public class Person {
 	public void setPhotoPath(String photoPath) {
 		this.photoPath = photoPath;
 	}
+	
+	
 }
