@@ -1,14 +1,11 @@
 package com.campuscommute.server;
 
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
 import java.util.List;
 
-@Repository
 public interface RideRepository extends JpaRepository<Ride, Long> {
-
-    // This will let you search for rides
-    List<Ride> findByStartLocationContaining(String query);
-    List<Ride> findByDestinationContaining(String query);
-
+    List<Ride> findByDriverId(Long driverId);
+    List<Ride> findByPassengerIdAndStatus(Long passengerId, String status);
+    List<Ride> findByDriverIdAndStatus(Long driverId, String status);
+    List<Ride> findByStatus(String status);
 }
