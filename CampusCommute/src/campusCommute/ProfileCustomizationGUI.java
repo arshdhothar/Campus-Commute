@@ -30,7 +30,7 @@ public class ProfileCustomizationGUI extends JFrame {
         setLayout(new BorderLayout(10, 10));
         setLocationRelativeTo(null);
 
-        // LEFT PANEL — PHOTO
+        // Left panel - photo
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
 
@@ -56,7 +56,7 @@ public class ProfileCustomizationGUI extends JFrame {
         leftPanel.add(photoLabel, BorderLayout.CENTER);
         leftPanel.add(uploadButton, BorderLayout.SOUTH);
 
-        // RIGHT PANEL — BIO
+        // Right panel - bio
         JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 20));
 
@@ -70,7 +70,7 @@ public class ProfileCustomizationGUI extends JFrame {
         rightPanel.add(new JLabel("Your Bio:"), BorderLayout.NORTH);
         rightPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // BOTTOM — BUTTONS
+        // Bottom - buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
 
@@ -84,7 +84,7 @@ public class ProfileCustomizationGUI extends JFrame {
         add(rightPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // BUTTON HANDLERS
+        // Button handlers
         uploadButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
@@ -133,7 +133,9 @@ public class ProfileCustomizationGUI extends JFrame {
                 JOptionPane.showMessageDialog(this,
                         "Profile saved successfully!");
 
-                dispose();
+                new ViewProfileGUI(CurrentUser.loggedInUser);
+
+                dispose(); // This closes the edit window
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Server error " + response.statusCode(),
