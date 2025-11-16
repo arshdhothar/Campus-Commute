@@ -16,7 +16,7 @@ public class ProfileCustomizationGUI extends JFrame {
     private JLabel photoLabel;
     private JButton uploadButton, saveButton, emergencyContactButton;
 
-    // --- MODIFIED: Added fields for US15 ---
+    // --- Fields for notification preferences ---
     private JCheckBox confirmToggle;
     private JCheckBox cancelToggle;
     private JCheckBox reminderToggle;
@@ -30,7 +30,7 @@ public class ProfileCustomizationGUI extends JFrame {
         this.currentUser = currentUser;
 
         setTitle("Customize Profile - " + currentUser.getEmail());
-        setSize(600, 500); // --- MODIFIED: Increased height for new panel
+        setSize(600, 500); // Increased height for new panel
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
         setLocationRelativeTo(null);
@@ -61,7 +61,7 @@ public class ProfileCustomizationGUI extends JFrame {
         leftPanel.add(photoLabel, BorderLayout.CENTER);
         leftPanel.add(uploadButton, BorderLayout.SOUTH);
 
-        // --- MODIFIED: Right panel now includes bio AND notifications ---
+        // --- Right panel now includes bio AND notifications ---
         JPanel rightPanel = new JPanel(new BorderLayout(10, 15)); // Added vertical gap
         rightPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 20));
 
@@ -96,7 +96,6 @@ public class ProfileCustomizationGUI extends JFrame {
         // Add both panels to the right panel
         rightPanel.add(bioPanel, BorderLayout.CENTER);
         rightPanel.add(notificationPanel, BorderLayout.SOUTH);
-        // --- END OF MODIFICATION ---
 
         // Bottom - buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -140,13 +139,14 @@ public class ProfileCustomizationGUI extends JFrame {
 
     private void saveProfile() {
         try {
-            // --- MODIFIED: Save all fields ---
+            // --- Save all fields ---
             currentUser.setBio(bioTextArea.getText());
-            // photoPath is already set by its listener
+            // photoPath is already set by the uploadButton listener
+
+            // Save notification settings
             currentUser.setNotifyOnConfirmation(confirmToggle.isSelected());
             currentUser.setNotifyOnCancellation(cancelToggle.isSelected());
             currentUser.setNotifyOnReminder(reminderToggle.isSelected());
-            // --- END OF MODIFICATION ---
 
             String jsonBody = gson.toJson(currentUser);
 
@@ -165,7 +165,7 @@ public class ProfileCustomizationGUI extends JFrame {
                 JOptionPane.showMessageDialog(this,
                         "Profile saved successfully!");
                 
-                // This is your new line, I've kept it
+                // Open the ViewProfileGUI
                 new ViewProfileGUI(CurrentUser.loggedInUser); 
 
                 dispose(); // This closes the edit window
