@@ -1,151 +1,242 @@
 package campusCommute;
 
 import java.awt.EventQueue;
-
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.border.EmptyBorder;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
-
+import com.google.gson.Gson;
 
 /**
  * CampusCommuteGUI
  *
- * A simple GUI for adding and viewing available rides.
- * 
- * Users can input ride details (start, destination, time, seats, price)
- * and add them to a list displayed on the right-hand side of the window.
+ * DRIVER UI for posting rides.
+ * This version CONNECTS TO BACKEND.
+ * - Posts rides to MySQL (via Spring Boot)
+ * - Loads rides from backend on startup
+ *
+ * --- REWRITTEN WITH ALL FIXES ---
  */
 public class CampusCommuteGUI extends JFrame {
-	
+
     // GUI components
-	private JPanel contentPane;
-	private JTextField startField, destinationField, timeField, seatsField, priceField;
-	private DefaultListModel<String> rideListModel;
-	private JList<String> rideList;
-	
-	// Data model
-	private List<Ride> rides;
+    private JTextField startField, destinationField, timeField, seatsField, priceField;
+    private DefaultListModel<String> rideListModel;
+    private JList<String> rideList;
 
-	/**
-	 * Launch the application.
-	 */
-	public static void main(String[] args) {
-		EventQueue.invokeLater(new Runnable() {
-			public void run() {
-				try {
-					CampusCommuteGUI frame = new CampusCommuteGUI();
-					frame.setVisible(true);
-				} catch (Exception e) {
-					e.printStackTrace();
-				}
-			}
-		});
-	}
+    // Backend + JSON
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final Gson gson = new Gson();
 
-	/**
-	 * Create the frame.
-	 */
-	public CampusCommuteGUI() {
-		// Initialize the in-memory ride list 
-		rides  = new ArrayList<>();
-		
-		// Frame configuration
-		setTitle("Campus Commute");
-		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		setSize(600, 450);
-		setLocationRelativeTo(null);
-		
-		// Main content panel
-		JPanel panel = new JPanel(new BorderLayout(10, 10));
-		panel.setBackground(new Color(245, 245, 245));
-		panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
-		setContentPane(panel);
-		
-		// Title label at the top
-		JLabel title = new JLabel("Campus Commute", SwingConstants.CENTER);
-		title.setFont(new Font("Segoe UI", Font.BOLD, 20));
-		panel.add(title, BorderLayout.NORTH);
-		
-		// Panel for user input fields
-		JPanel inputPanel = new JPanel(new GridLayout(6, 2, 8, 8));
-		inputPanel.setBackground(Color.WHITE);
-		inputPanel.setBorder(BorderFactory.createCompoundBorder(BorderFactory.createTitledBorder("Add Ride"), 
-				BorderFactory.createEmptyBorder(10, 10, 10, 10)));
-		
-		inputPanel.add(new JLabel("Start Location:"));
-		startField = new JTextField();
-		inputPanel.add(startField);
-		
-		inputPanel.add(new JLabel("Destination"));
-		destinationField = new JTextField();
-		inputPanel.add(destinationField);
-		
-		inputPanel.add(new JLabel("Departure Time:"));
-		timeField = new JTextField();
-		inputPanel.add(timeField);
-		
-		inputPanel.add(new JLabel("Available Seats:"));
-		seatsField = new JTextField();
-		inputPanel.add(seatsField);
-		
-		inputPanel.add(new JLabel("Price:"));
-		priceField = new JTextField();
-		inputPanel.add(priceField);
-		
-		JButton addRideButton = new JButton("Add Ride");
-		addRideButton.setForeground(new Color(30, 144, 255));
-		addRideButton.setFocusPainted(false);
-		addRideButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
-		inputPanel.add(addRideButton);
-		panel.add(inputPanel, BorderLayout.WEST);
-		
-		rideListModel = new DefaultListModel<>();
-		JList<String> rideList = new JList<>(rideListModel);
-		rideList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-		JScrollPane scrollPane = new JScrollPane(rideList);
-		scrollPane.setBorder(BorderFactory.createTitledBorder("Available Rides"));
-		panel.add(scrollPane, BorderLayout.CENTER);
-		
-		addRideButton.addActionListener(e -> addRide());
-	}
-	
-	/**u
-	 * Handles adding a new ride to the list.
-	 * Reads input values, validates them, creates a new Ride, and updates the display.
-	 */
-	private void addRide() {
-		try {
-			
-			//Take user input
-			String start = startField.getText();
-			String dest = destinationField.getText();
-			String time = timeField.getText();
-			int seats = Integer.parseInt(seatsField.getText());
-			double price = Double.parseDouble(priceField.getText());
-			
-			//Create a ride in the list
-			Ride ride = new Ride(start, dest, time, seats, price);
-			rides.add(ride);
-			rideListModel.addElement(ride.toString());
-			
-			//Clear fields so a new ride can be entered
-			startField.setText("");
-			destinationField.setText("");
-			timeField.setText("");
-			seatsField.setText("");
-			priceField.setText("");
-			
-			//Success message
-			JOptionPane.showMessageDialog(this,  "Ride added successfully!");
-			
-		} catch (NumberFormatException ex) {
-			//Invalid input message
-			JOptionPane.showMessageDialog(this, "Seats and Price must be numeric");
-		}
-	}
+    // Local ride list (mirrors backend)
+    private List<Ride> rides = new ArrayList<>();
+
+    /**
+     * Main launcher
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(() -> {
+            try {
+                // This main method is for testing only.
+                // You must log in via LoginFrame for the app to work.
+                CampusCommuteGUI frame = new CampusCommuteGUI();
+                frame.setVisible(true);
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        });
+    }
+
+    /**
+     * Constructor — sets up UI and loads rides from backend
+     */
+    public CampusCommuteGUI() {
+
+        // --- FIX 1: ADDED LOGIN CHECK ---
+        // This prevents a crash if the window is opened without a user.
+        if (CurrentUser.loggedInUser == null) {
+            JOptionPane.showMessageDialog(this,
+                    "You must be logged in to post a ride.",
+                    "Login Required",
+                    JOptionPane.ERROR_MESSAGE);
+            dispose(); // Close this window
+            return;    // Stop running the rest of the constructor
+        }
+        // --- END OF FIX ---
+
+        // Frame settings
+        setTitle("Campus Commute — Driver Console");
+        // --- FIX 2: CHANGED TO DISPOSE_ON_CLOSE ---
+        // This stops this window from shutting down the whole app.
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setSize(700, 500);
+        setLocationRelativeTo(null);
+
+        // MAIN PANEL
+        JPanel panel = new JPanel(new BorderLayout(10, 10));
+        panel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
+        setContentPane(panel);
+
+        // TITLE
+        JLabel title = new JLabel("Driver Ride Posting", SwingConstants.CENTER);
+        title.setFont(new Font("Segoe UI", Font.BOLD, 22));
+        panel.add(title, BorderLayout.NORTH);
+
+        // INPUT PANEL
+        JPanel inputPanel = new JPanel(new GridLayout(7, 2, 8, 8));
+        inputPanel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createTitledBorder("Add New Ride"),
+                BorderFactory.createEmptyBorder(10, 10, 10, 10)
+        ));
+
+        inputPanel.add(new JLabel("Start Location:"));
+        startField = new JTextField();
+        inputPanel.add(startField);
+
+        inputPanel.add(new JLabel("Destination:"));
+        destinationField = new JTextField();
+        inputPanel.add(destinationField);
+
+        inputPanel.add(new JLabel("Departure Time:"));
+        timeField = new JTextField();
+        inputPanel.add(timeField);
+
+        inputPanel.add(new JLabel("Available Seats:"));
+        seatsField = new JTextField();
+        inputPanel.add(seatsField);
+
+        inputPanel.add(new JLabel("Price:"));
+        priceField = new JTextField();
+        inputPanel.add(priceField);
+
+        // POST BUTTON
+        JButton addRideButton = new JButton("Post Ride");
+        addRideButton.setForeground(new Color(30, 144, 255));
+        addRideButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        inputPanel.add(addRideButton);
+
+        // DRIVER PANEL BUTTON
+        JButton driverPanelButton = new JButton("Open Driver Panel");
+        driverPanelButton.setForeground(new Color(0, 140, 70));
+        driverPanelButton.setFont(new Font("Segoe UI", Font.BOLD, 14));
+        inputPanel.add(driverPanelButton);
+
+        panel.add(inputPanel, BorderLayout.WEST);
+
+        // RIDE LIST DISPLAY
+        rideListModel = new DefaultListModel<>();
+        rideList = new JList<>(rideListModel);
+        rideList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+
+        JScrollPane scrollPane = new JScrollPane(rideList);
+        scrollPane.setBorder(BorderFactory.createTitledBorder("Posted Rides"));
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        // ACTIONS
+        addRideButton.addActionListener(e -> addRide());
+        driverPanelButton.addActionListener(e -> openDriverPanel());
+
+        // LOAD RIDES FROM SERVER
+        loadRidesFromBackend();
+
+        // Set visible *last* after adding the login check
+        setVisible(true);
+    }
+
+    /**
+     * POST new ride to backend
+     */
+    private void addRide() {
+        try {
+            String start = startField.getText().trim();
+            String dest = destinationField.getText().trim();
+            String time = timeField.getText().trim();
+            int seats = Integer.parseInt(seatsField.getText().trim());
+            double price = Double.parseDouble(priceField.getText().trim());
+
+            // 1. Get the logged-in user's ID (this is now safe)
+            Long driverId = CurrentUser.loggedInUser.getID();
+
+            // 2. Create the ride
+            Ride ride = new Ride(start, dest, time, seats, price);
+
+            // 3. SET THE DRIVER ID on the ride object
+            ride.setDriverId(driverId);
+
+            String json = gson.toJson(ride);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/rides/create"))
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .header("Content-Type", "application/json")
+                    .build();
+
+            httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            JOptionPane.showMessageDialog(this, "Ride posted to server!");
+
+            // Refresh UI
+            loadRidesFromBackend();
+
+            // Clear fields
+            startField.setText("");
+            destinationField.setText("");
+            timeField.setText("");
+            seatsField.setText("");
+            priceField.setText("");
+
+        } catch (NumberFormatException ex) {
+            JOptionPane.showMessageDialog(this, "Seats must be a number and Price must be a decimal.", "Input Error", JOptionPane.ERROR_MESSAGE);
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Error posting ride: " + ex.getMessage());
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * GET all rides from backend
+     */
+    private void loadRidesFromBackend() {
+        try {
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/rides"))
+                    .GET()
+                    .build();
+
+            HttpResponse<String> response =
+                    httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            Ride[] backendRides = gson.fromJson(response.body(), Ride[].class);
+
+            rideListModel.clear();
+            rides.clear();
+
+            if (backendRides != null) {
+                for (Ride r : backendRides) {
+                    rides.add(r);
+                    rideListModel.addElement(r.toString());
+                }
+            }
+
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(this, "Could not load rides from server.");
+            ex.printStackTrace();
+        }
+    }
+
+    /**
+     * Open backend-synced Driver Panel
+     */
+    private void openDriverPanel() {
+        // This will now correctly open the DriverGUI
+        SwingUtilities.invokeLater(() -> new DriverGUI());
+    }
 }

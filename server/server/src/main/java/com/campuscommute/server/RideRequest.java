@@ -1,44 +1,43 @@
 package com.campuscommute.server;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.JoinColumn;
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import jakarta.persistence.*;
 
 @Entity
 public class RideRequest {
 
-	@Id
-	@GeneratedValue(strategy = GenerationType.IDENTITY) 
-	private Long id; 
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
-	private String passengerName;
-	private boolean approved;
+    private Long passengerId;
+    private String passengerName;
 
+    private String status;
 
-	@ManyToOne
-	@JoinColumn(name = "ride_id")
-	private Ride ride;
+    @ManyToOne
+    @JoinColumn(name = "ride_id")
+    @JsonBackReference
+    private Ride ride;
 
-	public RideRequest() {
-	}
+    public RideRequest() {}
 
-	public RideRequest(String passengerName) {
-		this.passengerName = passengerName;
-		this.approved = false;
-	}
+    public RideRequest(Long passengerId, String passengerName) {
+        this.passengerId = passengerId;
+        this.passengerName = passengerName;
+        this.status = "PENDING";
+    }
 
-	public Long getID() {
-		return id;
-	}
+    // Getters
+    public Long getId() { return id; }
+    public Long getPassengerId() { return passengerId; }
+    public String getPassengerName() { return passengerName; }
+    public String getStatus() { return status; }
+    public Ride getRide() { return ride; }
 
-	public Ride getRide() {
-		return ride;
-	}
-
-	public void setRide(Ride ride) {
-		this.ride = ride;
-	}
+    // Setters
+    public void setPassengerId(Long passengerId) { this.passengerId = passengerId; }
+    public void setPassengerName(String passengerName) { this.passengerName = passengerName; }
+    public void setStatus(String status) { this.status = status; }
+    public void setRide(Ride ride) { this.ride = ride; }
 }
