@@ -7,147 +7,143 @@ import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import javax.swing.*;
 import java.awt.*;
+
 /**
- * This class handles the login part of the application, checks if the user is in the database before logging in, uses signup, and userdatamanager classes
+ * LoginFrame
+ *
+ * Fully backend-synced login:
+ * - Sends email/password to backend
+ * - Receives full Person object
+ * - Stores in CurrentUser.loggedInUser
+ * - Opens correct GUI based on userType
  */
 public class LoginFrame extends JFrame {
 
     private final JTextField emailField = new JTextField(20);
     private final JPasswordField passwordField = new JPasswordField(20);
+
     private final JButton loginButton = new JButton("Login");
     private final JButton signupButton = new JButton("Go to Sign Up");
 
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final Gson gson = new Gson();
+
     public LoginFrame() {
-    	//name window
         super("CampusCommute — Login");
 
         JPanel form = new JPanel(new GridBagLayout());
         GridBagConstraints base = new GridBagConstraints();
         base.insets = new Insets(8, 12, 8, 12);
         base.fill = GridBagConstraints.HORIZONTAL;
-        
-        //uses the add row helper to add fields to the window
+
         int row = 0;
         addRow(form, base, row++, "Email:", emailField);
         addRow(form, base, row++, "Password:", passwordField);
 
-        //row of the buttons, signup + login button
         GridBagConstraints gcBtn = (GridBagConstraints) base.clone();
         gcBtn.gridx = 0; gcBtn.gridy = row; gcBtn.gridwidth = 2;
-        gcBtn.weightx = 1.0; gcBtn.anchor = GridBagConstraints.CENTER;
+        gcBtn.anchor = GridBagConstraints.CENTER;
 
-        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-        btnPanel.add(loginButton);
-        btnPanel.add(signupButton);
-        form.add(btnPanel, gcBtn);
+        JPanel buttons = new JPanel(new FlowLayout());
+        buttons.add(loginButton);
+        buttons.add(signupButton);
+        form.add(buttons, gcBtn);
 
-        //login button goes to the method that validates login
-        loginButton.addActionListener(e -> validateAndMaybeLogin());
-        
-        //signup button goes to to the signup opening method
+        loginButton.addActionListener(e -> performLogin());
         signupButton.addActionListener(e -> openSignupPage());
 
         setContentPane(form);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         pack();
-        setMinimumSize(new Dimension(400, getHeight()));
         setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
     }
-    /**
-     * Helper method to validate login information
-     */
-    private void validateAndMaybeLogin() {
-        // --- 1. Your original validation ---
-        emailField.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
-        passwordField.setBorder(UIManager.getLookAndFeel().getDefaults().getBorder("TextField.border"));
-        String email = emailField.getText().trim();
-        String pass  = new String(passwordField.getPassword()).trim();
 
-        if (email.isEmpty() || pass.isEmpty()) {
-            if (email.isEmpty()) emailField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            if (pass.isEmpty()) passwordField.setBorder(BorderFactory.createLineBorder(Color.RED));
-            JOptionPane.showMessageDialog(this, "Please enter both email and password.", "Missing Information", JOptionPane.WARNING_MESSAGE);
+    // ============================================================
+    // LOGIN LOGIC
+    // ============================================================
+    private void performLogin() {
+        String email = emailField.getText().trim();
+        String password = new String(passwordField.getPassword()).trim();
+
+        if (email.isEmpty() || password.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Email and password required.");
             return;
         }
 
-        // --- 2. The new networking part ---
+        LoginRequest body = new LoginRequest(email, password);
+        String jsonBody = gson.toJson(body);
+
         try {
-            // 1. Create the LoginRequest object
-            LoginRequest loginData = new LoginRequest(email, pass);
-
-            // 2. Convert it to JSON
-            Gson gson = new Gson();
-            String jsonRequestBody = gson.toJson(loginData);
-
-            // 3. Create the client and request
-            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI("http://localhost:8080/api/login")) // The new login endpoint
+                    .uri(URI.create("http://localhost:8080/api/login"))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
                     .header("Content-Type", "application/json")
-                    .POST(HttpRequest.BodyPublishers.ofString(jsonRequestBody))
                     .build();
 
-            // 4. Send the request
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response =
+                    httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // 5. Check the response code!
-            if (response.statusCode() == 200) {
-                // 200 = OK (Success!)
-            	
-            	Person userFromDb = gson.fromJson(response.body(), Person.class);
-            	CurrentUser.loggedInUser = userFromDb;
-            	
-                JOptionPane.showMessageDialog(this,
-                        "Login successful!",
-                        "Welcome",
-                        JOptionPane.INFORMATION_MESSAGE);
-            } else if (response.statusCode() == 401) {
-                // 401 = Unauthorized (Wrong password/email)
-                JOptionPane.showMessageDialog(this,
-                    "Incorrect email or password.",
-                    "Login Failed",
-                    JOptionPane.ERROR_MESSAGE);
+            if (response.statusCode() != 200) {
+                JOptionPane.showMessageDialog(this, "Invalid login.");
+                return;
+            }
+
+            Person loggedIn = gson.fromJson(response.body(), Person.class);
+            CurrentUser.loggedInUser = loggedIn;
+
+            JOptionPane.showMessageDialog(this, "Welcome " + loggedIn.getfName() + "!");
+
+            dispose();
+
+            // OPEN APPROPRIATE GUI
+            if (loggedIn.getUserType().equalsIgnoreCase("driver")) {
+                new DriverGUI();
+                new CampusCommuteGUI(); // <-- ADDED: Opens the ride posting window
+                
+            } else if (loggedIn.getUserType().equalsIgnoreCase("user")) {
+                new PassengerGUI();
+                
             } else {
-                // Other server error
-                JOptionPane.showMessageDialog(this,
-                    "Server error: " + response.statusCode(),
-                    "Login Failed",
-                    JOptionPane.ERROR_MESSAGE);
+                // "both" userType
+                Object choice = JOptionPane.showInputDialog(
+                        this,
+                        "Choose mode:",
+                        "Select Mode",
+                        JOptionPane.QUESTION_MESSAGE,
+                        null,
+                        new String[]{"Passenger", "Driver"},
+                        "Passenger"
+                );
+
+                if ("Driver".equals(choice)) {
+                    new DriverGUI();
+                    new CampusCommuteGUI(); // <-- ADDED: Also opens posting window for "both"
+                } else {
+                    new PassengerGUI();
+                }
             }
 
         } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this,
-                "Error connecting to server: " + ex.getMessage() +
-                "\n\n(Is the Springboot server running?)",
-                "Connection Error",
-                JOptionPane.ERROR_MESSAGE);
+            JOptionPane.showMessageDialog(this, "Server error: " + ex.getMessage());
         }
     }
 
-    /**
-     * helper method to simplify adding rows to the window
-     * @param panel active panel
-     * @param base base
-     * @param row the row number of the field
-     * @param label the label we want for the field
-     * @param field
-     */
+    // ============================================================
+    // HELPERS
+    // ============================================================
     private static void addRow(JPanel panel, GridBagConstraints base, int row, String label, JComponent field) {
         GridBagConstraints gcLabel = (GridBagConstraints) base.clone();
-        gcLabel.gridx = 0; gcLabel.gridy = row; gcLabel.weightx = 0; gcLabel.gridwidth = 1;
+        gcLabel.gridx = 0; gcLabel.gridy = row;
         panel.add(new JLabel(label), gcLabel);
 
         GridBagConstraints gcField = (GridBagConstraints) base.clone();
-        gcField.gridx = 1; gcField.gridy = row; gcField.weightx = 1.0; gcField.gridwidth = 1;
+        gcField.gridx = 1; gcField.gridy = row;
         panel.add(field, gcField);
     }
-    //method to activate opening signup widnow
+
     private void openSignupPage() {
-        SwingUtilities.invokeLater(() -> {
-            dispose(); // close login window
-            new SignUpFrame().setVisible(true); // open signup
-        });
+        dispose();
+        new SignUpFrame().setVisible(true);
     }
 
     public static void main(String[] args) {

@@ -45,6 +45,16 @@ Acceptance Criteria:
 * I can change or hide my info whenever I want.
 * The app should flag any inappropriate photos or text.
 
+### User Story 10 - Route Optimization (Arsh)
+
+As a user, I want to see all my personal details on a dedicated profile screen, so that I can confirm my information is correct.
+
+Acceptance Critiera:
+* The user is able to access a read-only profile screen
+* This screen displays the user’s full name, email, phone number, user type, and bio
+* This screen displays the user’s profile photo.
+* The screen has an “Edit Profile” button that, when clicked, opens the ProfileCustomizationGUI.
+
 ### User Story 15 - Notification Preferences (Zack)
 
 As a user, I want to customize what notifications I receive so that I’m only alerted about important events.
@@ -64,6 +74,17 @@ Acceptance Criteria:
 * Users can add/edit one emergency contact in their profile.
 * Contact info is securely stored.
 * Can be viewed by admin or safety system during emergency events.
+
+### User Story 21 - DriverGUI (Zack)
+
+As a driver,  I want a screen where I can see all my rides and the requests for each ride, so that I can quickly review and accept passengers without confusion.
+
+Acceptance Criteria:
+
+*DriverGUI shows a list of rides created by the logged-in driver.
+*Selecting a ride displays its passenger requests.
+*An “Accept Request” button is available and triggers the backend accept API.
+
 
 ___
 
@@ -101,16 +122,6 @@ Acceptance Criteria:
 * The trip cost is automatically calculated and split equally among all passengers.
 * Passengers are automatically charged when the trip is done.
 * Drivers receive payment within 24 hours.
-
-### User Story 10 - Route Optimization
-
-As a driver, I want the app to suggest the most efficient route for my trip so that I can save time and fuel.
-
-Acceptance Criteria:
-
-* The app shows a recommended route based on pickup/drop-off points.
-* Displays estimated time and distance.
-* Allows driver to edit or confirm the suggested route.
 
 ### User Story 11 - Carpool Scheduling (Recurring Rides)
 

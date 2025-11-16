@@ -84,12 +84,16 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 - Stores ride details such as start location, destination, departure time, available seats, and price.
 - Provides methods to return formatted ride details (e.g., via toString() for display in the GUI).
 - Validates ride information to ensure numeric and logical correctness (e.g., seat and price validation).
+- Maintain list of RideRequest objects.
 
 
 **Collaborators:**
 - RideRequest
 - CampusCommuteGUI (Driver UI)
 - PassengerGUI (Passenger UI)
+- RideRequest
+- RideController   (last 3 are backend files) 
+- RideRepository
 
 
 ---
@@ -289,22 +293,23 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 
 ---
 
-### **Class Name:** RideHistoryFrame
-**Parent Class:** None  
-**Subclasses:** None  
+### **Class Name:** DriverGUI
+**Parent Class:** JFrame
+**Subclasses:** None
 
 **Responsibilities:**
-- Display completed rides for a driver or passenger.
-- Allow users to view and download ride receipts.
-- Load ride data from RideService.
-- Show only finished rides with relevant details (date, cost, route).
+- Load the logged-in driver's rides from backend.
+- Display ride requests for each ride.
+- Allow driver to accept a request.
+- Show completed ride history.
 
 **Collaborators:**
-- RideService:fetches and provides ride data.
-- Ride:holds individual ride information.
-- NotificationCenter:shows confirmation popups or alerts.
-
+- Ride
+- RideRequest
+- CurrentUser
+- Backend API 
 ---
+
 ### **Class Name:** NotificationCenter
 **Parent Class:** None  
 **Subclasses:** None  
@@ -370,6 +375,22 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 
  ---
 
+ ### **Class Name:** CurrentUser
+**Parent Class:** None
+**Subclasses:** None
+
+**Responsibilities:**
+- Store the logged-in Person object globally.
+- Provide global access to the user's ID and name.
+
+**Collaborators:**
+- PassengerGUI
+- DriverGUI
+- LoginFrame
+- ProfileCustomizationGUI
+  
+---
+
 ## 4. System Interaction and Environment
 
 The Campus Commute system is a desktop application developed in **Java SE 21** using **Swing** for the user interface.  
@@ -382,6 +403,21 @@ All data is stored locally in text files, so the system does not depend on an ex
 - Only one user instance runs at a time.
 
 ---
+
+### **Class Name:** Person
+**Parent Class:** None
+**Subclasses:** None
+
+**Responsibilities:**
+- Store user profile information (name, email, password, userType).
+- Store optional fields (bio, emergency contact, photo path).
+
+**Collaborators:**
+- CurrentUser
+- LoginFrame
+- ProfileCustomizationGUI
+
+ ---
 
 ## 5. System Architecture Diagram
 

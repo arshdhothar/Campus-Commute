@@ -1,107 +1,86 @@
-package campusCommute; 
+package campusCommute;
 
 public class Person {
 
-	private Long ID; 
-	private String email, phone, fName, lName, DOB, password, address, userType;
-	private String emergencyContactName, emergencyContactPhone;
+    private Long id;
+    private String email;
+    private String phone;
+    private String fName;
+    private String lName;
+    private String dob;
+    private String password;
+    private String address;
+    private String userType;
+    private boolean notifyConfirmations = true;
+    private boolean notifyCancellations = true;
+    private boolean notifyReminders = true;
 
-	public Person() {
-		
-	}
+    // Fields needed for profile customization
+    private String bio;
+    private String photoPath;
+    // private String emergencyContactName; // You can add these later
+    // private String emergencyContactPhone;
 
-	public Person(String email, String phone, String fName, String lName, String DOB, String password, String address, String userType) {
-		this.email = email;
-		this.phone = phone;
-		this.fName = fName;
-		this.lName = lName;
-		this.DOB = DOB;
-		this.password = password;
-		this.address = address;
-		this.userType = userType;
-	}
+    // Default constructor (required for Gson/JPA)
+    public Person() {}
 
-	public Long getID() {
-		return ID;
-	}
+    // Constructor for creating a new user (optional but helpful)
+    public Person(String email, String phone, String fName, String lName,
+                  String dob, String password, String address, String userType) {
 
-	public String getEmail() {
-		return email;
-	}
-
-	public void setEmail(String email) {
-		this.email = email;
-	}
-
-	public String getfName() {
-		return fName;
-	}
-
-	public void setfName(String fName) {
-		this.fName = fName;
-	}
-
-	public String getlName() {
-		return lName;
-	}
-
-	public void setlName(String lName) {
-		this.lName = lName;
-	}
-
-	public String getDOB() {
-		return DOB;
-	}
-
-	public void setDOB(String dOB) {
-		DOB = dOB;
-	}
-
-	public String getPassword() {
-		return password;
-	}
-
-	public void setPassword(String password) {
-		this.password = password;
-	}
-
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-
-	public String getaddress() {
-		return address;
-	}
-
-	public void setaddress(String address) {
-		this.address = address;
-	}
-
-	public String getUserType() {
-		return userType;
-	}
-
-	public void setUserType(String userType) {
-		this.userType = userType;
-	}
-	
-	public String getEmergencyContactName() {
-        return emergencyContactName;
+        this.email = email;
+        this.phone = phone;
+        this.fName = fName;
+        this.lName = lName;
+        this.dob = dob;
+        this.password = password;
+        this.address = address;
+        this.userType = userType;
     }
 
-    public void setEmergencyContactName(String emergencyContactName) {
-        this.emergencyContactName = emergencyContactName;
+    // --- GETTERS ---
+    // These are needed to READ data from the object
+
+    public Long getID() { return id; }
+    public String getEmail() { return email; }
+    public String getPhone() { return phone; }
+    public String getfName() { return fName; }
+    public String getlName() { return lName; }
+    public String getDob() { return dob; }
+    public String getPassword() { return password; }
+    public String getAddress() { return address; }
+    public String getUserType() { return userType; }
+    public String getBio() { return bio; }
+    public String getPhotoPath() { return photoPath; }
+
+    // --- SETTERS ---
+    // These are needed for Gson to CREATE the object from JSON
+    // and for your GUI to UPDATE the object's values
+
+    public void setID(Long id) { this.id = id; }
+    public void setEmail(String email) { this.email = email; }
+    public void setPhone(String phone) { this.phone = phone; }
+    public void setfName(String fName) { this.fName = fName; }
+    public void setlName(String lName) { this.lName = lName; }
+    public void setDob(String dob) { this.dob = dob; }
+    public void setPassword(String password) { this.password = password; }
+    public void setAddress(String address) { this.address = address; }
+    public void setUserType(String userType) { this.userType = userType; }
+    public void setBio(String bio) { this.bio = bio; }
+    public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
+    
+    public boolean isNotifyConfirmations() { return notifyConfirmations; }
+    public void setNotifyConfirmations(boolean notifyConfirmations) {
+        this.notifyConfirmations = notifyConfirmations;
     }
 
-    public String getEmergencyContactPhone() {
-        return emergencyContactPhone;
+    public boolean isNotifyCancellations() { return notifyCancellations; }
+    public void setNotifyCancellations(boolean notifyCancellations) {
+        this.notifyCancellations = notifyCancellations;
     }
 
-    public void setEmergencyContactPhone(String emergencyContactPhone) {
-        this.emergencyContactPhone = emergencyContactPhone;
+    public boolean isNotifyReminders() { return notifyReminders; }
+    public void setNotifyReminders(boolean notifyReminders) {
+        this.notifyReminders = notifyReminders;
     }
 }

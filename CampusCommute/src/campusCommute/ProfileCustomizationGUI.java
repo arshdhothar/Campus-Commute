@@ -2,27 +2,35 @@ package campusCommute;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.*;
 import java.io.File;
 
+import com.google.gson.Gson;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+
 public class ProfileCustomizationGUI extends JFrame {
+
     private JTextArea bioTextArea;
     private JLabel photoLabel;
-    private JButton uploadButton, saveButton;
-    private UserProfile profile;
-    private User currentUser;
+    private JButton uploadButton, saveButton, emergencyContactButton;
 
-    public ProfileCustomizationGUI(User currentUser) {
+    private Person currentUser;
+
+    private final HttpClient httpClient = HttpClient.newHttpClient();
+    private final Gson gson = new Gson();
+
+    public ProfileCustomizationGUI(Person currentUser) {
         this.currentUser = currentUser;
-        setTitle("Customize Profile - " + currentUser.getUsername());
-        setSize(600, 400);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        setTitle("Customize Profile - " + currentUser.getEmail());
+        setSize(600, 450);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
+        setLocationRelativeTo(null);
 
-        // Load existing profile or create new one
-        profile = loadOrCreateProfile();
-
-        // Left panel: Profile picture
+        // LEFT PANEL — PHOTO
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
 
@@ -30,48 +38,61 @@ public class ProfileCustomizationGUI extends JFrame {
         photoLabel.setPreferredSize(new Dimension(200, 200));
         photoLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        if (!profile.getPhotoPath().isEmpty()) {
-            ImageIcon icon = new ImageIcon(profile.getPhotoPath());
-            Image scaled = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
-            photoLabel.setIcon(new ImageIcon(scaled));
+        // Load existing photo from backend field "photo_path"
+        if (currentUser.getPhotoPath() != null && !currentUser.getPhotoPath().isEmpty()) {
+            try {
+                ImageIcon icon = new ImageIcon(currentUser.getPhotoPath());
+                Image scaled = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
+                photoLabel.setIcon(new ImageIcon(scaled));
+            } catch (Exception e) {
+                photoLabel.setText("Photo not found");
+                System.err.println("Could not load image: " + e.getMessage());
+            }
         } else {
             photoLabel.setText("No photo selected");
         }
 
         uploadButton = new JButton("Upload Photo");
-        JPanel uploadPanel = new JPanel();
-        uploadPanel.add(uploadButton);
-
         leftPanel.add(photoLabel, BorderLayout.CENTER);
-        leftPanel.add(uploadPanel, BorderLayout.SOUTH);
+        leftPanel.add(uploadButton, BorderLayout.SOUTH);
 
-        // Right panel: Bio + Save buton
-        JPanel rightPanel = new JPanel(new BorderLayout(10, 10));
+        // RIGHT PANEL — BIO
+        JPanel rightPanel = new JPanel(new BorderLayout());
         rightPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 20));
 
-        bioTextArea = new JTextArea(profile.getBio().isEmpty() ? "Write your bio here..." : profile.getBio());
+        bioTextArea = new JTextArea();
         bioTextArea.setLineWrap(true);
         bioTextArea.setWrapStyleWord(true);
-        bioTextArea.setFont(new Font("SansSerif", Font.PLAIN, 14));
 
-        JScrollPane bioScroll = new JScrollPane(bioTextArea);
-        bioScroll.setBorder(BorderFactory.createTitledBorder("Your Bio"));
+        bioTextArea.setText(currentUser.getBio() != null ? currentUser.getBio() : "");
 
+        JScrollPane scrollPane = new JScrollPane(bioTextArea);
+        rightPanel.add(new JLabel("Your Bio:"), BorderLayout.NORTH);
+        rightPanel.add(scrollPane, BorderLayout.CENTER);
+
+        // BOTTOM — BUTTONS
+        JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
+
+        emergencyContactButton = new JButton("Update Emergency Contact");
         saveButton = new JButton("Save Profile");
 
-        rightPanel.add(bioScroll, BorderLayout.CENTER);
-        rightPanel.add(saveButton, BorderLayout.SOUTH);
+        buttonPanel.add(emergencyContactButton);
+        buttonPanel.add(saveButton);
 
-        // Add both panels side by side
         add(leftPanel, BorderLayout.WEST);
         add(rightPanel, BorderLayout.CENTER);
+        add(buttonPanel, BorderLayout.SOUTH);
 
-        // Button Logic
+        // BUTTON HANDLERS
         uploadButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 File file = chooser.getSelectedFile();
-                profile.setPhotoPath(file.getAbsolutePath());
+
+                // Store into backend JSON field "photo_path"
+                currentUser.setPhotoPath(file.getAbsolutePath());
+
                 ImageIcon icon = new ImageIcon(file.getAbsolutePath());
                 Image scaled = icon.getImage().getScaledInstance(200, 200, Image.SCALE_SMOOTH);
                 photoLabel.setIcon(new ImageIcon(scaled));
@@ -81,33 +102,51 @@ public class ProfileCustomizationGUI extends JFrame {
 
         saveButton.addActionListener(e -> saveProfile());
 
-        setVisible(true);
-    }
+        emergencyContactButton.addActionListener(e ->
+                JOptionPane.showMessageDialog(this,
+                        "Coming soon!",
+                        "Info",
+                        JOptionPane.INFORMATION_MESSAGE)
+        );
 
-    private UserProfile loadOrCreateProfile() {
-        String filename = "profiles/" + currentUser.getUsername() + "_profile.ser";
-        try {
-            return UserProfile.loadProfile(filename);
-        } catch (Exception e) {
-            System.out.println("No saved profile found for " + currentUser.getUsername() + ", creating new one.");
-            return new UserProfile();
-        }
+        setVisible(true);
     }
 
     private void saveProfile() {
         try {
-            profile.setBio(bioTextArea.getText());
-            String filename = "profiles/" + currentUser.getUsername() + "_profile.ser";
-            profile.saveProfile(filename);
-            JOptionPane.showMessageDialog(this, "Profile saved successfully!");
+            currentUser.setBio(bioTextArea.getText());
+
+            String jsonBody = gson.toJson(currentUser);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/profile/update"))
+                    .POST(HttpRequest.BodyPublishers.ofString(jsonBody))
+                    .header("Content-Type", "application/json")
+                    .build();
+
+            HttpResponse<String> response =
+                    httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                CurrentUser.loggedInUser = gson.fromJson(response.body(), Person.class);
+
+                JOptionPane.showMessageDialog(this,
+                        "Profile saved successfully!");
+
+                dispose();
+            } else {
+                JOptionPane.showMessageDialog(this,
+                        "Server error " + response.statusCode(),
+                        "Error",
+                        JOptionPane.ERROR_MESSAGE);
+            }
+
         } catch (Exception ex) {
             ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Error saving profile.");
+            JOptionPane.showMessageDialog(this,
+                    "Could not connect: " + ex.getMessage(),
+                    "Connection Error",
+                    JOptionPane.ERROR_MESSAGE);
         }
-    }
-
-    // For testing
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ProfileCustomizationGUI(new User("jdoe")));
     }
 }
