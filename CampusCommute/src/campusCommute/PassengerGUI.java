@@ -20,9 +20,7 @@ import com.google.gson.Gson;
 
 /**
  * PassengerGUI – Modern UI + Full Backend Support
- * - Search rides
- * - Request a ride
- * - View ride history
+ * --- NOW INCLUDES 'MY PROFILE' TAB ---
  */
 public class PassengerGUI extends JFrame {
 
@@ -101,9 +99,28 @@ public class PassengerGUI extends JFrame {
 
         histPanel.add(new JScrollPane(historyTable), BorderLayout.CENTER);
 
+        // -------------------------------------------------------
+        // --- NEW --- TAB 3: MY PROFILE (opens new window)
+        // -------------------------------------------------------
+        JPanel profilePlaceholderPanel = new JPanel();
+        tabs.addTab("My Profile", profilePlaceholderPanel);
+        
+
+        // --- MODIFIED ChangeListener ---
         tabs.addChangeListener(e -> {
-            if (tabs.getSelectedIndex() == 1)
+            int selectedIndex = tabs.getSelectedIndex();
+            
+            if (selectedIndex == 1) {
+                // User clicked "Ride History"
                 loadRideHistory();
+            } else if (selectedIndex == 2) {
+                // User clicked "My Profile"
+                // Open the ViewProfileGUI as a new window
+                new ViewProfileGUI(CurrentUser.loggedInUser);
+                
+                // Set the tab back to "Search Rides"
+                tabs.setSelectedIndex(0); 
+            }
         });
 
         setVisible(true);
@@ -209,7 +226,6 @@ public class PassengerGUI extends JFrame {
         requestBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         requestBtn.setPreferredSize(new Dimension(120, 30));
 
-        // Subtle outlined style (matching screenshot)
         requestBtn.setFocusPainted(false);
         requestBtn.setBackground(Color.WHITE);
         requestBtn.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));

@@ -16,6 +16,7 @@ import java.awt.*;
  * - Receives full Person object
  * - Stores in CurrentUser.loggedInUser
  * - Opens correct GUI based on userType
+ * - **Provides a choice for drivers**
  */
 public class LoginFrame extends JFrame {
 
@@ -55,7 +56,9 @@ public class LoginFrame extends JFrame {
         setContentPane(form);
         pack();
         setLocationRelativeTo(null);
-        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        // --- FIX ---
+        // Changed to DISPOSE_ON_CLOSE so it doesn't kill the app
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
     // ============================================================
@@ -95,10 +98,11 @@ public class LoginFrame extends JFrame {
 
             dispose();
 
+            // --- MODIFIED SECTION ---
             // OPEN APPROPRIATE GUI
             if (loggedIn.getUserType().equalsIgnoreCase("driver")) {
-                new DriverGUI();
-                new CampusCommuteGUI(); // <-- ADDED: Opens the ride posting window
+                // Give the driver a choice
+                showDriverOptions();
                 
             } else if (loggedIn.getUserType().equalsIgnoreCase("user")) {
                 new PassengerGUI();
@@ -116,16 +120,46 @@ public class LoginFrame extends JFrame {
                 );
 
                 if ("Driver".equals(choice)) {
-                    new DriverGUI();
-                    new CampusCommuteGUI(); // <-- ADDED: Also opens posting window for "both"
+                    // Give the driver a choice
+                    showDriverOptions();
                 } else {
                     new PassengerGUI();
                 }
             }
+            // --- END OF MODIFIED SECTION ---
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Server error: " + ex.getMessage());
         }
+    }
+
+    // ============================================================
+    // --- NEW HELPER METHOD FOR DRIVER CHOICE ---
+    // ============================================================
+    /**
+     * Shows a popup dialog asking the driver what they want to do.
+     */
+    private void showDriverOptions() {
+        String[] options = {"Manage My Rides", "Post a New Ride"};
+        
+        // Show the dialog
+        Object choice = JOptionPane.showInputDialog(
+                null, // Parent component (null centers on screen)
+                "What would you like to do?", // Message
+                "Driver Menu", // Title
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                options, // The array of choices
+                options[0] // Default choice
+        );
+
+        // Handle the choice
+        if ("Manage My Rides".equals(choice)) {
+            new DriverGUI();
+        } else if ("Post a New Ride".equals(choice)) {
+            new CampusCommuteGUI();
+        }
+        // If they click "Cancel" (choice is null), nothing happens, which is fine.
     }
 
     // ============================================================
