@@ -128,10 +128,7 @@ public class ProfileCustomizationGUI extends JFrame {
         saveButton.addActionListener(e -> saveProfile());
 
         emergencyContactButton.addActionListener(e ->
-                JOptionPane.showMessageDialog(this,
-                        "Coming soon!",
-                        "Info",
-                        JOptionPane.INFORMATION_MESSAGE)
+        	new EmergencyContanctInfoFrame().setVisible(true)
         );
 
         setVisible(true);
