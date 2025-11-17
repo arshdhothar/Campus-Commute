@@ -30,6 +30,8 @@ To run our project, you need:
 - **Java Swing** (included in Java 21)  
 - **Eclipse IDE for Java Developers**  
 - **GitHub**
+- **SQL Workbench and Community Server**
+- **Java Spring**
 
 ### **1. Import Using Git Integration In eclipse**
 Video available for instructions : https://www.youtube.com/watch?v=u9FjJkZeWgg
@@ -37,10 +39,14 @@ Video available for instructions : https://www.youtube.com/watch?v=u9FjJkZeWgg
 2. Git -> Project From Git(with smart import)
 3. The url field should be the link to the repository, user is your github username and the password is a classic token generated in github(not your actual password), press next
 If you have trouble creating a token follow : https://stackoverflow.com/questions/29807277/cloning-the-git-repository-on-eclipse-transport-error
-4. Select the branches you want to download then press next
+4. Select the main branch then press next
 5. Choose the initial branch as main and press next
 6. In this screen, it is very important **uncheck Search for nested projects** this is very important and check detect and configure project natures and click finish
-7. Now you have acess to our application
+7. Open SQL workbench and create a database named "campus_commute" using command ** create database campus_commute;"
+8. Now edit the application.properties file project-aszia\server\server\src\main\resources, edit the field that has "rootroot" to your sql workbench password
+9. To run the sql server, go to to the project-aszia\server\server directory and open CMD in that directory
+10. In this CMD window run the command ".\mvnw spring-boot:run" , after this the sql server should be running
+11. You can now freely use our application with a special database in your system.
 
 ### **2.Import using downloaded zip file**
 1. Download our main repository as a zip file
