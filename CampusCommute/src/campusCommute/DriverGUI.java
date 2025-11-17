@@ -16,11 +16,7 @@ import com.google.gson.Gson;
 /**
  * DriverGUI
  * Fully Backend Synced.
- *
- * --- CORRECTED VERSION ---
- * - Uses correct JList for requests
- * - Uses efficient API endpoint
- * - Correctly accepts selected request
+ * --- NOW INCLUDES 'MY PROFILE' TAB AND 'POST RIDE' BUTTON ---
  */
 public class DriverGUI extends JFrame {
 
@@ -28,7 +24,6 @@ public class DriverGUI extends JFrame {
     private DefaultListModel<String> rideListModel;
     private JList<String> rideListUI;
 
-    // --- FIX 1: Changed JTextArea to a JList for requests ---
     private DefaultListModel<RideRequest> requestListModel;
     private JList<RideRequest> requestListUI;
 
@@ -37,22 +32,20 @@ public class DriverGUI extends JFrame {
 
     // Backend data
     private List<Ride> driverRides = new ArrayList<>();
-    private List<RideRequest> currentRequests = new ArrayList<>(); // Kept for logic
+    private List<RideRequest> currentRequests = new ArrayList<>();
 
     private final Gson gson = new Gson();
 
     public DriverGUI() {
 
-        // --- FIX 2: Added the login check ---
         if (CurrentUser.loggedInUser == null) {
             JOptionPane.showMessageDialog(this,
                     "You must be logged in to view the Driver Panel.",
                     "Login Required",
                     JOptionPane.ERROR_MESSAGE);
-            dispose(); // Close this broken window
-            return;    // Stop running the rest of the constructor
+            dispose(); 
+            return;    
         }
-        // --- END OF FIX ---
 
         setTitle("Driver Panel");
         setSize(800, 520);
@@ -76,21 +69,31 @@ public class DriverGUI extends JFrame {
 
         ridePanel.add(rideScroll, BorderLayout.WEST);
 
-        // --- FIX 3: Initialized the new JList for requests ---
         requestListModel = new DefaultListModel<>();
         requestListUI = new JList<>(requestListModel);
         requestListUI.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        // Use a custom renderer to show the passenger's name
         requestListUI.setCellRenderer(new RequestRenderer());
 
         JScrollPane requestScroll = new JScrollPane(requestListUI);
         requestScroll.setBorder(BorderFactory.createTitledBorder("Passenger Requests"));
-        // --- END OF FIX ---
 
         ridePanel.add(requestScroll, BorderLayout.CENTER);
 
+        // --- MODIFIED: Created a panel to hold both buttons ---
+        JPanel southButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
+        
         JButton acceptButton = new JButton("Accept Request");
-        ridePanel.add(acceptButton, BorderLayout.SOUTH);
+        acceptButton.addActionListener(e -> acceptSelectedRequest());
+        southButtonPanel.add(acceptButton);
+
+        // --- NEW: Added the "Post a New Ride" button ---
+        JButton postRideButton = new JButton("Post a New Ride");
+        postRideButton.addActionListener(e -> openCampusCommuteGUI());
+        southButtonPanel.add(postRideButton);
+
+        // Add the new button panel to the bottom
+        ridePanel.add(southButtonPanel, BorderLayout.SOUTH);
+        // --- END OF MODIFICATION ---
 
         rideListUI.addListSelectionListener(e -> {
             if (!e.getValueIsAdjusting()) {
@@ -98,10 +101,6 @@ public class DriverGUI extends JFrame {
             }
         });
 
-        acceptButton.addActionListener(e -> acceptSelectedRequest());
-
-        // ... (rest of the constructor for History tab) ...
-        
         // -------------------------------------------------------
         // TAB 2: RIDE HISTORY
         // -------------------------------------------------------
@@ -116,9 +115,28 @@ public class DriverGUI extends JFrame {
         JScrollPane historyScroll = new JScrollPane(historyTable);
         historyPanel.add(historyScroll, BorderLayout.CENTER);
 
+        // -------------------------------------------------------
+        // TAB 3: MY PROFILE (opens new window)
+        // -------------------------------------------------------
+        JPanel profilePlaceholderPanel = new JPanel();
+        tabs.addTab("My Profile", profilePlaceholderPanel);
+        
+
+        // --- MODIFIED ChangeListener ---
         tabs.addChangeListener(e -> {
-            if (tabs.getSelectedIndex() == 1) {
+            int selectedIndex = tabs.getSelectedIndex();
+            
+            if (selectedIndex == 1) {
+                // User clicked "Ride History"
                 loadDriverHistory();
+            } else if (selectedIndex == 2) {
+                // User clicked "My Profile"
+                // Open the ViewProfileGUI as a new window
+                new ViewProfileGUI(CurrentUser.loggedInUser);
+                
+                // Set the tab back to "My Rides" so it doesn't
+                // look like they are "on" the empty profile tab.
+                tabs.setSelectedIndex(0); 
             }
         });
 
@@ -133,12 +151,8 @@ public class DriverGUI extends JFrame {
     // ========================================================
     private void loadDriverRides() {
         try {
-            // 1. Get the ID (this is now safe because of the constructor check)
             long driverId = CurrentUser.loggedInUser.getID();
-
-            // 2. Use the correct, specific API endpoint
             URL url = new URL("http://localhost:8080/api/rides/driver/" + driverId);
-            
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("GET");
 
@@ -147,22 +161,19 @@ public class DriverGUI extends JFrame {
             String json = reader.lines().collect(Collectors.joining());
             reader.close();
 
-            // 3. The JSON now *only* contains this driver's rides
             Ride[] rides = gson.fromJson(json, Ride[].class);
             
             driverRides.clear();
             rideListModel.clear();
 
-            // 4. No more "if" filter needed! Just add all of them.
             for (Ride r : rides) {
                 driverRides.add(r);
                 rideListModel.addElement(r.toString());
             }
 
         } catch (Exception e) {
-            // This will still catch server errors, which is good.
             JOptionPane.showMessageDialog(this, "Error loading rides.");
-            e.printStackTrace(); // Helps you debug
+            e.printStackTrace(); 
         }
     }
 
@@ -170,27 +181,19 @@ public class DriverGUI extends JFrame {
     // LOAD REQUESTS FOR SELECTED RIDE (FIXED)
     // ========================================================
     private void loadRequestsForSelectedRide() {
-        // Clear the UI lists first
         requestListModel.clear();
         currentRequests.clear();
 
         int index = rideListUI.getSelectedIndex();
         if (index == -1) {
-            return; // Nothing is selected
+            return; 
         }
 
-        // 1. Get the ride object you ALREADY downloaded
         Ride selectedRide = driverRides.get(index);
-
-        // 2. Get the list of requests DIRECTLY from that object.
-        //    (No new network call is needed!)
         List<RideRequest> requests = selectedRide.getRequests();
 
-        // 3. Populate the UI from the list we just retrieved
         if (requests != null && !requests.isEmpty()) {
             for (RideRequest req : requests) {
-                
-                // Only show pending requests that can be accepted
                 if ("PENDING".equalsIgnoreCase(req.getStatus())) {
                     requestListModel.addElement(req);
                     currentRequests.add(req);
@@ -198,7 +201,6 @@ public class DriverGUI extends JFrame {
             }
         }
 
-        // 4. If no *pending* requests were found, show a message
         if (requestListModel.isEmpty()) {
             RideRequest placeholder = new RideRequest(0L, "No pending requests.");
             requestListModel.addElement(placeholder);
@@ -209,9 +211,7 @@ public class DriverGUI extends JFrame {
     // ACCEPT REQUEST (FIXED)
     // ========================================================
     private void acceptSelectedRequest() {
-
         int rideIndex = rideListUI.getSelectedIndex();
-        // --- FIX: Get the selected request from the new JList ---
         int requestIndex = requestListUI.getSelectedIndex();
 
         if (rideIndex == -1 || requestIndex == -1) {
@@ -220,10 +220,8 @@ public class DriverGUI extends JFrame {
         }
 
         Ride ride = driverRides.get(rideIndex);
-        // --- FIX: Get the actual selected request object ---
         RideRequest req = requestListUI.getSelectedValue();
 
-        // Check if it's the "No pending requests" placeholder
         if (req.getPassengerId() == 0L) return;
 
         long driverId = CurrentUser.loggedInUser.getID();
@@ -231,7 +229,6 @@ public class DriverGUI extends JFrame {
         long requestId = req.getId();
 
         try {
-            // Build the URL with all required parameters
             String urlString = String.format("http://localhost:8080/api/ride/%d/accept?driverId=%d&passengerId=%d&requestId=%d",
                     ride.getId(),
                     driverId,
@@ -242,11 +239,9 @@ public class DriverGUI extends JFrame {
             HttpURLConnection conn = (HttpURLConnection) url.openConnection();
             conn.setRequestMethod("POST");
             
-            // Check response code to confirm success
             int responseCode = conn.getResponseCode();
             if (responseCode == 200) {
                  JOptionPane.showMessageDialog(this, "Request accepted! Ride marked as COMPLETED!");
-                 // Refresh the UI
                  loadDriverRides();
                  requestListModel.clear();
                  currentRequests.clear();
@@ -297,23 +292,29 @@ public class DriverGUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Error loading history.");
         }
     }
+    
+    // --- NEW HELPER METHOD ---
+    /**
+     * Opens the CampusCommuteGUI (ride posting) window.
+     * This is safe because both GUIs have login checks.
+     */
+    private void openCampusCommuteGUI() {
+        new CampusCommuteGUI();
+    }
+    // --- END OF NEW METHOD ---
 
-    // --- FIX: Added an inner class to render the request list ---
     /**
      * Custom ListCellRenderer to display RideRequest objects in a JList.
-     * It shows the passenger's name and status.
      */
     class RequestRenderer extends DefaultListCellRenderer {
         @Override
         public Component getListCellRendererComponent(JList<?> list, Object value, int index,
                                                       boolean isSelected, boolean cellHasFocus) {
             
-            // Let the default renderer handle colors, selection, etc.
             Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
 
             if (value instanceof RideRequest) {
                 RideRequest req = (RideRequest) value;
-                // Don't show ID for the placeholder
                 if (req.getPassengerId() == 0L) {
                     setText(req.getPassengerName());
                 } else {

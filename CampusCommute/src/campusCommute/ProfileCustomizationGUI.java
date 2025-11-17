@@ -16,6 +16,11 @@ public class ProfileCustomizationGUI extends JFrame {
     private JLabel photoLabel;
     private JButton uploadButton, saveButton, emergencyContactButton;
 
+    // --- Fields for notification preferences ---
+    private JCheckBox confirmToggle;
+    private JCheckBox cancelToggle;
+    private JCheckBox reminderToggle;
+
     private Person currentUser;
 
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -25,12 +30,12 @@ public class ProfileCustomizationGUI extends JFrame {
         this.currentUser = currentUser;
 
         setTitle("Customize Profile - " + currentUser.getEmail());
-        setSize(600, 450);
+        setSize(600, 500); // Increased height for new panel
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLayout(new BorderLayout(10, 10));
         setLocationRelativeTo(null);
 
-        // LEFT PANEL — PHOTO
+        // Left panel - photo
         JPanel leftPanel = new JPanel(new BorderLayout());
         leftPanel.setBorder(BorderFactory.createEmptyBorder(20, 20, 20, 10));
 
@@ -38,7 +43,7 @@ public class ProfileCustomizationGUI extends JFrame {
         photoLabel.setPreferredSize(new Dimension(200, 200));
         photoLabel.setBorder(BorderFactory.createLineBorder(Color.GRAY));
 
-        // Load existing photo from backend field "photo_path"
+        // Load existing photo
         if (currentUser.getPhotoPath() != null && !currentUser.getPhotoPath().isEmpty()) {
             try {
                 ImageIcon icon = new ImageIcon(currentUser.getPhotoPath());
@@ -56,21 +61,43 @@ public class ProfileCustomizationGUI extends JFrame {
         leftPanel.add(photoLabel, BorderLayout.CENTER);
         leftPanel.add(uploadButton, BorderLayout.SOUTH);
 
-        // RIGHT PANEL — BIO
-        JPanel rightPanel = new JPanel(new BorderLayout());
+        // --- Right panel now includes bio AND notifications ---
+        JPanel rightPanel = new JPanel(new BorderLayout(10, 15)); // Added vertical gap
         rightPanel.setBorder(BorderFactory.createEmptyBorder(20, 10, 20, 20));
 
+        // Bio Panel
+        JPanel bioPanel = new JPanel(new BorderLayout());
         bioTextArea = new JTextArea();
         bioTextArea.setLineWrap(true);
         bioTextArea.setWrapStyleWord(true);
-
         bioTextArea.setText(currentUser.getBio() != null ? currentUser.getBio() : "");
-
         JScrollPane scrollPane = new JScrollPane(bioTextArea);
-        rightPanel.add(new JLabel("Your Bio:"), BorderLayout.NORTH);
-        rightPanel.add(scrollPane, BorderLayout.CENTER);
+        bioPanel.add(new JLabel("Your Bio:"), BorderLayout.NORTH);
+        bioPanel.add(scrollPane, BorderLayout.CENTER);
 
-        // BOTTOM — BUTTONS
+        // Notification Panel
+        JPanel notificationPanel = new JPanel();
+        notificationPanel.setLayout(new BoxLayout(notificationPanel, BoxLayout.Y_AXIS));
+        notificationPanel.setBorder(BorderFactory.createTitledBorder("Notification Preferences"));
+
+        confirmToggle = new JCheckBox("Notify on ride confirmations");
+        cancelToggle = new JCheckBox("Notify on ride cancellations");
+        reminderToggle = new JCheckBox("Notify with ride reminders");
+
+        // Set state from user object
+        confirmToggle.setSelected(currentUser.isNotifyOnConfirmation());
+        cancelToggle.setSelected(currentUser.isNotifyOnCancellation());
+        reminderToggle.setSelected(currentUser.isNotifyOnReminder());
+
+        notificationPanel.add(confirmToggle);
+        notificationPanel.add(cancelToggle);
+        notificationPanel.add(reminderToggle);
+
+        // Add both panels to the right panel
+        rightPanel.add(bioPanel, BorderLayout.CENTER);
+        rightPanel.add(notificationPanel, BorderLayout.SOUTH);
+
+        // Bottom - buttons
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setBorder(BorderFactory.createEmptyBorder(0, 20, 10, 20));
 
@@ -84,13 +111,11 @@ public class ProfileCustomizationGUI extends JFrame {
         add(rightPanel, BorderLayout.CENTER);
         add(buttonPanel, BorderLayout.SOUTH);
 
-        // BUTTON HANDLERS
+        // Button handlers
         uploadButton.addActionListener(e -> {
             JFileChooser chooser = new JFileChooser();
             if (chooser.showOpenDialog(this) == JFileChooser.APPROVE_OPTION) {
                 File file = chooser.getSelectedFile();
-
-                // Store into backend JSON field "photo_path"
                 currentUser.setPhotoPath(file.getAbsolutePath());
 
                 ImageIcon icon = new ImageIcon(file.getAbsolutePath());
@@ -114,7 +139,14 @@ public class ProfileCustomizationGUI extends JFrame {
 
     private void saveProfile() {
         try {
+            // --- Save all fields ---
             currentUser.setBio(bioTextArea.getText());
+            // photoPath is already set by the uploadButton listener
+
+            // Save notification settings
+            currentUser.setNotifyOnConfirmation(confirmToggle.isSelected());
+            currentUser.setNotifyOnCancellation(cancelToggle.isSelected());
+            currentUser.setNotifyOnReminder(reminderToggle.isSelected());
 
             String jsonBody = gson.toJson(currentUser);
 
@@ -132,8 +164,11 @@ public class ProfileCustomizationGUI extends JFrame {
 
                 JOptionPane.showMessageDialog(this,
                         "Profile saved successfully!");
+                
+                // Open the ViewProfileGUI
+                new ViewProfileGUI(CurrentUser.loggedInUser); 
 
-                dispose();
+                dispose(); // This closes the edit window
             } else {
                 JOptionPane.showMessageDialog(this,
                         "Server error " + response.statusCode(),

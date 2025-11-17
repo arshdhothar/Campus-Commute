@@ -85,7 +85,15 @@ Acceptance Criteria:
 *Selecting a ride displays its passenger requests.
 *An “Accept Request” button is available and triggers the backend accept API.
 
+### User Story 13 - Campus Map Integration
 
+As a rider, I want to see pickup and drop-off locations and get directions for them using Google Maps.
+
+Acceptance Criteria:
+
+* Map view available for all ride posts.
+* Directions to the destination and starting locations.
+* Integration with Google Maps API or equivalent.
 ___
 
 ## Unassigned 📥
@@ -147,15 +155,7 @@ Acceptance Criteria:
 * Displays total CO₂ saved on user profile dashboard.
 * Updates dynamically with every new ride joined or hosted.
 
-### User Story 13 - Campus Map Integration
 
-As a rider, I want to see pickup and drop-off locations on a York University campus map so that I can plan my route easily.
-
-Acceptance Criteria:
-
-* Map view available for all ride posts.
-* Pins for pickup and drop-off points.
-* Integration with Google Maps API or equivalent.
 
 ### User Story 14 - Ride Cancellation Policy
 

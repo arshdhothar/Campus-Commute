@@ -20,6 +20,11 @@ public class Person {
 	private String bio;
 	
 	private String photoPath;
+	
+	// --- NEW FIELDS FOR US15 ---
+	private boolean notifyOnConfirmation = true;
+	private boolean notifyOnCancellation = true;
+	private boolean notifyOnReminder = true;
 
 	// A default constructor is required by JPA
 	public Person() {
@@ -37,7 +42,7 @@ public class Person {
 		this.userType = userType;
 	}
 
-	// Getters and setters
+	// --- Getters and setters ---
 
 	public Long getID() {
 		return ID;
@@ -142,6 +147,30 @@ public class Person {
 	public void setPhotoPath(String photoPath) {
 		this.photoPath = photoPath;
 	}
+
+	// --- NEW GETTERS/SETTERS FOR US15 ---
 	
-	
+	public boolean isNotifyOnConfirmation() {
+		return notifyOnConfirmation;
+	}
+
+	public void setNotifyOnConfirmation(boolean notifyOnConfirmation) {
+		this.notifyOnConfirmation = notifyOnConfirmation;
+	}
+
+	public boolean isNotifyOnCancellation() {
+		return notifyOnCancellation;
+	}
+
+	public void setNotifyOnCancellation(boolean notifyOnCancellation) {
+		this.notifyOnCancellation = notifyOnCancellation;
+	}
+
+	public boolean isNotifyOnReminder() {
+		return notifyOnReminder;
+	}
+
+	public void setNotifyOnReminder(boolean notifyOnReminder) {
+		this.notifyOnReminder = notifyOnReminder;
+	}
 }

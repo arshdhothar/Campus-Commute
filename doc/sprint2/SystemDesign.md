@@ -391,6 +391,70 @@ The system’s design encourages eco-friendly travel and sets the stage for late
   
 ---
 
+## **Class Name:** EmergencyButtonPanel
+**Parent Class:** `JPanel`  
+**Subclasses:** None  
+
+### **Responsibilities**
+- Display the Emergency button in Passenger and Driver GUIs.  
+- Hold user name, phone number, and ride ID for the alert.  
+- Send an emergency alert request to the backend API.  
+- Show confirmation or error messages to the user.  
+
+### **Collaborators**
+- `EmergencyAlertRequest`  
+- `EmergencyContactsStore`  
+- `PassengerGUI`  
+- `CampusCommuteGUI`  
+- Backend Emergency Controller  
+
+---
+
+## **Class Name:** EmergencyAlertRequest
+**Parent Class:** None  
+**Subclasses:** None  
+
+### **Responsibilities**
+- Store emergency alert fields (`rideId`, `userName`, `userPhone`).  
+- Convert data into JSON for backend transmission.  
+- Act as a data-transfer object between UI and backend.  
+
+### **Collaborators**
+- `EmergencyButtonPanel`  
+- Backend Emergency Controller  
+
+---
+
+## **Class Name:** EmergencyContactsDialog
+**Parent Class:** `JDialog`  
+**Subclasses:** None  
+
+### **Responsibilities**
+- Provide UI for adding, removing, and viewing emergency contacts.  
+- Display contacts in a list with Add/Remove buttons.  
+- Save updated contacts when the user clicks **Save**.  
+
+### **Collaborators**
+- `EmergencyContactsStore`  
+- `PassengerGUI`  
+- `CampusCommuteGUI`  
+
+---
+
+## **Class Name:** EmergencyContactsStore
+**Parent Class:** None  
+**Subclasses:** None  
+
+### **Responsibilities**
+- Load saved emergency contacts from a local JSON file.  
+- Save updated contacts persistently for future sessions.  
+- Provide access to the user's emergency contact list.  
+
+### **Collaborators**
+- `EmergencyContactsDialog`  
+- `EmergencyButtonPanel`  
+
+ ---
 ## 4. System Interaction and Environment
 
 The Campus Commute system is a desktop application developed in **Java SE 21** using **Swing** for the user interface.  

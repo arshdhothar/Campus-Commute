@@ -13,17 +13,18 @@ public class RideController {
 
     @Autowired
     private RideRequestRepository rideRequestRepository;
+    
+    // This is required for the new notification logic
+    @Autowired
+    private PersonRepository personRepository;
 
     // ---------------------------------------------------------
-    // 1. DRIVER CREATES RIDE (NOW REQUIRES driverId)
+    // 1. DRIVER CREATES RIDE
     // ---------------------------------------------------------
     @PostMapping("/rides/create")
     public Ride createRide(@RequestBody Ride ride) {
-
-        // driverId already comes inside the ride object
         ride.setStatus("PENDING");
         ride.setDate(java.time.LocalDate.now().toString());
-
         return rideRepository.save(ride);
     }
 
@@ -36,7 +37,7 @@ public class RideController {
     }
 
     // ---------------------------------------------------------
-    // 3. GET RIDES FOR SPECIFIC DRIVER (DriverGUI uses this)
+    // 3. GET RIDES FOR SPECIFIC DRIVER
     // ---------------------------------------------------------
     @GetMapping("/rides/driver/{driverId}")
     public List<Ride> getDriverRides(@PathVariable Long driverId) {
@@ -70,7 +71,7 @@ public class RideController {
 
 
     // ---------------------------------------------------------
-    // 6. DRIVER ACCEPTS REQUEST
+    // 6. DRIVER ACCEPTS REQUEST (MODIFIED)
     // ---------------------------------------------------------
     @PostMapping("/ride/{rideId}/accept")
     public Ride acceptRide(
@@ -85,11 +86,33 @@ public class RideController {
         RideRequest req = rideRequestRepository.findById(requestId).orElse(null);
         if (req == null) return null;
 
+        // Update the request status
         req.setStatus("APPROVED");
         rideRequestRepository.save(req);
 
+        // Update the ride status
         ride.acceptRide(driverId, passengerId);
-        return rideRepository.save(ride);
+        Ride savedRide = rideRepository.save(ride);
+
+        // --- NEW LOGIC FOR USER STORY 15 (AC #3) ---
+        try {
+            // Find the passenger who needs to be notified
+            Person passenger = personRepository.findById(passengerId).orElse(null);
+
+            // Check their notification preference
+            if (passenger != null && passenger.isNotifyOnConfirmation()) {
+                // This is where you would put your email/SMS sending logic
+                System.out.println("NOTIFICATION: Sending 'Ride Confirmation' alert to: " + passenger.getEmail());
+            } else if (passenger != null) {
+                System.out.println("NOTIFICATION: User " + passenger.getEmail() + " has disabled confirmation alerts.");
+            }
+        } catch (Exception e) {
+            // Don't let a notification failure stop the API call
+            System.err.println("Error sending notification: " + e.getMessage());
+        }
+        // --- END OF NEW LOGIC ---
+
+        return savedRide; // Return the ride to the driver
     }
 
     // ---------------------------------------------------------
