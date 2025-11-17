@@ -289,6 +289,11 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 **Collaborators:**
 - User (determines which profile is being edited)
 - UserProfile (stores and provides the profile data)
+- ViewProfileGUI
+Backend:
+- AuthController.java
+- Person.java
+- PersonRepository.java
 
 
 ---
@@ -480,6 +485,24 @@ All data is stored locally in text files, so the system does not depend on an ex
 - CurrentUser
 - LoginFrame
 - ProfileCustomizationGUI
+
+ ---
+
+ ### **Class Name:** ViewProfileGUI
+**Parent Class:** JFrame
+**Subclasses:** None
+
+**Responsibilities:**
+- Display the current user's profile information (name, email, phone, user type, bio) in a read-only format
+- Provide a button to navigate to "Edit Profile" screen that sends you to ProfileCustomizationGUI
+- Provide a button to either "Offer a Ride" or "Find a Ride" that sends you to the respective GUI.
+
+**Collaborators:**
+- CurrentUser
+- Person
+- ProfileCustomizationGUI
+- PassengerGUI
+- CampusCommuteGUI
 
  ---
 
