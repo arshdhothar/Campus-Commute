@@ -190,6 +190,7 @@ public class PassengerGUI extends JFrame {
     }
 
 
+
     // ================================================================
     // RIDE CARD UI
     // ================================================================
@@ -200,7 +201,7 @@ public class PassengerGUI extends JFrame {
                 BorderFactory.createLineBorder(Color.LIGHT_GRAY),
                 new EmptyBorder(12, 12, 12, 12)
         ));
-        card.setMaximumSize(new Dimension(750, 150));
+        card.setMaximumSize(new Dimension(750, 170));
         card.setBackground(new Color(250, 250, 250));
 
         // ---- TOP INFO (title, time, price) ----
@@ -221,19 +222,39 @@ public class PassengerGUI extends JFrame {
 
         card.add(info, BorderLayout.CENTER);
 
-        // ---- REQUEST BUTTON AT BOTTOM ----
-        JButton requestBtn = new JButton("Request Ride");
-        requestBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        requestBtn.setPreferredSize(new Dimension(120, 30));
+        // =====================================================
+        // BUTTONS PANEL (Start, Destination, Request)
+        // =====================================================
 
-        requestBtn.setFocusPainted(false);
-        requestBtn.setBackground(Color.WHITE);
-        requestBtn.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));
+        JButton startBtn = new JButton("Start Location");
+        JButton destBtn = new JButton("Destination");
+        JButton requestBtn = new JButton("Request Ride");  // <-- same as before
 
+        Font btnFont = new Font("Segoe UI", Font.PLAIN, 13);
+        startBtn.setFont(btnFont);
+        destBtn.setFont(btnFont);
+        requestBtn.setFont(btnFont);
+
+        JButton[] buttons = {startBtn, destBtn, requestBtn};
+        for (JButton b : buttons) {
+            b.setPreferredSize(new Dimension(140, 30));
+            b.setFocusPainted(false);
+            b.setBackground(Color.WHITE);
+            b.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));
+        }
+
+        // ---- ACTIONS ----
+        // New: open maps for start / destination
+        startBtn.addActionListener(e -> openInMaps(r.getStartLocation()));
+        destBtn.addActionListener(e -> openInMaps(r.getDestination()));
+
+        // Existing logic preserved: still calls sendRideRequest(r)
         requestBtn.addActionListener(e -> sendRideRequest(r));
 
         JPanel buttonPanel = new JPanel();
         buttonPanel.setOpaque(false);
+        buttonPanel.add(startBtn);
+        buttonPanel.add(destBtn);
         buttonPanel.add(requestBtn);
 
         card.add(buttonPanel, BorderLayout.SOUTH);
@@ -309,4 +330,16 @@ public class PassengerGUI extends JFrame {
             JOptionPane.showMessageDialog(this, "Error loading history.");
         }
     }
+
+    //This method is used to oepn maps in a browser
+     private void openInMaps(String location) {
+         try {
+             String query = java.net.URLEncoder.encode(location, java.nio.charset.StandardCharsets.UTF_8);
+             String url = "https://maps.google.com/?q=" + query;
+             Desktop.getDesktop().browse(new URI(url));
+         } catch (Exception ex) {
+             JOptionPane.showMessageDialog(this, "Could not open browser.");
+         }
+     }
+
 }
