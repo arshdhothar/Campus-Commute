@@ -42,11 +42,11 @@ If you have trouble creating a token follow : https://stackoverflow.com/question
 4. Select the main branch then press next
 5. Choose the initial branch as main and press next
 6. In this screen, it is very important **uncheck Search for nested projects** this is very important and check detect and configure project natures and click finish
-7. Open SQL workbench and create a database named "campus_commute" using command ** create database campus_commute;"
-8. Now edit the application.properties file project-aszia\server\server\src\main\resources, edit the field that has "rootroot" to your sql workbench password
+7. Open SQL workbench and create a database named "campus_commute" using command ** create database campus_commute;" **
+8. Now edit the application.properties file in project-aszia\server\server\src\main\resources, edit the field that has "rootroot" to your sql workbench password
 9. To run the sql server, go to to the project-aszia\server\server directory and open CMD in that directory
 10. In this CMD window run the command ".\mvnw spring-boot:run" , after this the sql server should be running
-11. You can now freely use our application with a special database in your system.
+11. You can now freely use our application with a special database for your system.
 
 ### **2.Import using downloaded zip file**
 1. Download our main repository as a zip file
