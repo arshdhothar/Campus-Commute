@@ -36,8 +36,7 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 
 ### **Ibrahim**  
 - Write and complete the `sprint2.md` planning document. 
-- Implement and test **User Story 7**.  
-- Implement and test **User Story **.  
+- Implement and test **User Story 7**.   
 - Post minimum 3 standups. 
 - Update CRC cards and System Design document after completion. 
 
