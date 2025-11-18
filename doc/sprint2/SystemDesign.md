@@ -60,18 +60,40 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 
 ---
 
-### **Class Name:** User  
-**Parent Class:** Person  
-**Subclasses:** Student, Driver  
+### **Class Name:** EmergencyContanctInfoFrame
+**Parent Class:** JFrame
+**Subclasses:** None
 
-**Responsibilities:**  
-- Store and manage profile, credentials, and role.  
-- Allow passengers to request rides or drivers to accept them.  
-- Track past and upcoming trips.  
+**Responsibilities:**
+- Provides the UI for adding or updating a user's emergency contact.
+- Verifies a user is logged in by checking `CurrentUser` before displaying the window.
+- Gathers user input from `txtEmergencyName` and `txtEmergencyPhone`.
+- Handles the `btnSaveContact` click event and calls the `handleUpdateContact` method.
+- Displays success ("Updated Info") or error pop-up messages (`JOptionPane`).
 
-**Collaborators:**  
-- RideManager  
-- DatabaseHandler  
+**Collaborators:**
+- `CurrentUser`
+- `EmergencyContactRequest`
+- `Gson`
+- `HttpClient`, `HttpRequest`, `HttpResponse`
+- `JFrame`
+- `JOptionPane`
+
+---
+
+### **Class Name:** EmergencyContactRequest
+**Parent Class:** Object
+**Subclasses:** None
+
+**Responsibilities:**
+- Acts as a data-transfer object (DTO) to hold the information for an emergency contact update.
+- Stores the user's `email`, the contact's `contactName`, and the contact's `contactPhone`.
+- Is created by `EmergencyContanctInfoFrame` to be serialized into JSON.
+
+**Collaborators:**
+- `EmergencyContanctInfoFrame`
+- `Gson`
+- `AuthController` (on the server side)
 
 ---
 
@@ -255,23 +277,6 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 **Collaborators:**
 - ProfileCustomizationGUI (for display and editing)
 - User (to associate profile with a user account)
-
-
----
-
-### **Class Name:** User  
-**Parent Class:** None  
-**Subclasses:** None  
-
-**Responsibilities:**
-- Store and manage the user’s username.
-- Provide access to the username for other classes.
-
-
-**Collaborators:**
-- ProfileCustomizationGUI (used to associate the profile with a specific user)
-- UserProfile (each user has an associated profile)
-
 
 ---
 
@@ -505,6 +510,8 @@ All data is stored locally in text files, so the system does not depend on an ex
 - CampusCommuteGUI
 
  ---
+
+ 
 
 ## 5. System Architecture Diagram
 
