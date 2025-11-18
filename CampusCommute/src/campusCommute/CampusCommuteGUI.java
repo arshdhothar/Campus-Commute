@@ -23,7 +23,7 @@ import com.google.gson.Gson;
  * - Posts rides to MySQL (via Spring Boot)
  * - Loads rides from backend on startup
  *
- * --- REWRITTEN WITH ALL FIXES ---
+ * + Emergency button integrated (driver side)
  */
 public class CampusCommuteGUI extends JFrame {
 
@@ -31,6 +31,10 @@ public class CampusCommuteGUI extends JFrame {
     private JTextField startField, destinationField, timeField, seatsField, priceField;
     private DefaultListModel<String> rideListModel;
     private JList<String> rideList;
+
+    // Emergency button panel (added)
+    @SuppressWarnings("serial")
+    private EmergencyButtonPanel emergencyPanel;
 
     // Backend + JSON
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -45,8 +49,6 @@ public class CampusCommuteGUI extends JFrame {
     public static void main(String[] args) {
         EventQueue.invokeLater(() -> {
             try {
-                // This main method is for testing only.
-                // You must log in via LoginFrame for the app to work.
                 CampusCommuteGUI frame = new CampusCommuteGUI();
                 frame.setVisible(true);
             } catch (Exception e) {
@@ -60,22 +62,18 @@ public class CampusCommuteGUI extends JFrame {
      */
     public CampusCommuteGUI() {
 
-        // --- FIX 1: ADDED LOGIN CHECK ---
-        // This prevents a crash if the window is opened without a user.
+        // Login guard (your project uses CurrentUser)
         if (CurrentUser.loggedInUser == null) {
             JOptionPane.showMessageDialog(this,
                     "You must be logged in to post a ride.",
                     "Login Required",
                     JOptionPane.ERROR_MESSAGE);
-            dispose(); // Close this window
-            return;    // Stop running the rest of the constructor
+            dispose();
+            return;
         }
-        // --- END OF FIX ---
 
         // Frame settings
         setTitle("Campus Commute — Driver Console");
-        // --- FIX 2: CHANGED TO DISPOSE_ON_CLOSE ---
-        // This stops this window from shutting down the whole app.
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setSize(700, 500);
         setLocationRelativeTo(null);
@@ -140,14 +138,36 @@ public class CampusCommuteGUI extends JFrame {
         scrollPane.setBorder(BorderFactory.createTitledBorder("Posted Rides"));
         panel.add(scrollPane, BorderLayout.CENTER);
 
+     // --- Emergency bottom bar (always visible) ---
+        JPanel bottomBar = new JPanel(new BorderLayout(10, 0));
+        emergencyPanel = new EmergencyButtonPanel(
+                "Driver",
+                "N/A",
+                "NO_SELECTION"
+        );
+        bottomBar.add(emergencyPanel, BorderLayout.EAST);
+        panel.add(bottomBar, BorderLayout.SOUTH);
+
+
         // ACTIONS
         addRideButton.addActionListener(e -> addRide());
         driverPanelButton.addActionListener(e -> openDriverPanel());
 
-        // LOAD RIDES FROM SERVER
-        loadRidesFromBackend();
+        // Update emergency rideId when selection changes
+        rideList.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                if (!rideList.isSelectionEmpty() && rideList.getSelectedIndex() >= 0 && rideList.getSelectedIndex() < rides.size()) {
+                    int idx = rideList.getSelectedIndex();
+                    String rideId = resolveRideId(rides.get(idx), idx);
+                    emergencyPanel.setRideId(rideId);
+                } else {
+                    emergencyPanel.setRideId("NO_SELECTION");
+                }
+            }
+        });
 
-        // Set visible *last* after adding the login check
+        // Load rides and show window
+        loadRidesFromBackend();
         setVisible(true);
     }
 
@@ -162,13 +182,9 @@ public class CampusCommuteGUI extends JFrame {
             int seats = Integer.parseInt(seatsField.getText().trim());
             double price = Double.parseDouble(priceField.getText().trim());
 
-            // 1. Get the logged-in user's ID (this is now safe)
             Long driverId = CurrentUser.loggedInUser.getID();
 
-            // 2. Create the ride
             Ride ride = new Ride(start, dest, time, seats, price);
-
-            // 3. SET THE DRIVER ID on the ride object
             ride.setDriverId(driverId);
 
             String json = gson.toJson(ride);
@@ -183,8 +199,14 @@ public class CampusCommuteGUI extends JFrame {
 
             JOptionPane.showMessageDialog(this, "Ride posted to server!");
 
-            // Refresh UI
+            // Refresh UI and keep selection + emergency rideId sane
             loadRidesFromBackend();
+            if (rideListModel.getSize() > 0) {
+                int last = rideListModel.getSize() - 1;
+                rideList.setSelectedIndex(last);
+                String rideId = resolveRideId(rides.get(last), last);
+                emergencyPanel.setRideId(rideId);
+            }
 
             // Clear fields
             startField.setText("");
@@ -226,9 +248,19 @@ public class CampusCommuteGUI extends JFrame {
                 }
             }
 
+            // Auto-select first ride if available so emergency has a rideId ready
+            if (!rides.isEmpty()) {
+                rideList.setSelectedIndex(0);
+                String firstRideId = resolveRideId(rides.get(0), 0);
+                emergencyPanel.setRideId(firstRideId);
+            } else {
+                emergencyPanel.setRideId("NO_SELECTION");
+            }
+
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Could not load rides from server.");
             ex.printStackTrace();
+            emergencyPanel.setRideId("NO_SELECTION");
         }
     }
 
@@ -236,7 +268,23 @@ public class CampusCommuteGUI extends JFrame {
      * Open backend-synced Driver Panel
      */
     private void openDriverPanel() {
-        // This will now correctly open the DriverGUI
         SwingUtilities.invokeLater(() -> new DriverGUI());
+    }
+
+    /**
+     * Helper to choose a stable rideId for emergency alerts.
+     * If your Ride has a real ID getter (e.g., getId()), use it; otherwise fallback to index.
+     */
+    private String resolveRideId(Ride r, int index) {
+        try {
+            // If your Ride has a real getId() (Long/Integer/String), prefer that
+            // Replace "getId" with the actual getter if different, e.g., getRideId()
+            java.lang.reflect.Method m = r.getClass().getMethod("getId");
+            Object id = m.invoke(r);
+            if (id != null) return String.valueOf(id);
+        } catch (Exception ignore) {
+            // method not found or failed: fallback below
+        }
+        return "DRIVER_RIDE_" + index;
     }
 }
