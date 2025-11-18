@@ -45,7 +45,7 @@ Acceptance Criteria:
 * I can change or hide my info whenever I want.
 * The app should flag any inappropriate photos or text.
 
-### User Story 10 - Route Optimization (Arsh)
+### User Story 10 - View Profile (Arsh)
 
 As a user, I want to see all my personal details on a dedicated profile screen, so that I can confirm my information is correct.
 
