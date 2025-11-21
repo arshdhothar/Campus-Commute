@@ -2,446 +2,278 @@ package campusCommute;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellEditor;
+import javax.swing.table.TableCellRenderer;
 import java.awt.*;
-import java.net.URI;
-import java.net.URL;
-import java.net.HttpURLConnection;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
-import java.net.http.HttpResponse;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import com.google.gson.Gson;
-
-/**
- * PassengerGUI – Merged
- * - Modern UI with tabs (Search / History / My Profile)
- * - Backend integration (load rides, send requests, history)
- * - Classic search list + "Request Selected Ride" button (from v1)
- * - Emergency button panel on Search tab bottom bar (from v1)
- * - Supports both backend and local (legacy) operation
- */
 public class PassengerGUI extends JFrame {
 
-    // -------- Backend helpers --------
-    private final HttpClient httpClient = HttpClient.newHttpClient();
-    private final Gson gson = new Gson();
+    private JTabbedPane tabbedPane;
+    private JPanel searchPanel;
+    private JPanel historyPanel;
 
-    // -------- Common / legacy data --------
-    private Passenger passenger = new Passenger("Guest"); // v1 behavior for legacy/local use
-    private List<Ride> providedRides = new ArrayList<>(); // from v1 constructor
-    private List<Ride> allRides = new ArrayList<>();      // backend rides
-    private List<Ride> filtered = new ArrayList<>();      // merged filtering target
-
-    // -------- SEARCH (modern cards) --------
     private JTextField searchField;
-    private JPanel resultsContainer; // cards
+    private JList<String> searchResultsList;
+    private DefaultListModel<String> searchListModel;
+    private List<Ride> currentSearchRides = new ArrayList<>();
 
-    // -------- SEARCH (classic list + request button) --------
-    private DefaultListModel<String> resultsModel;
-    private JList<String> resultsList;
-    private JButton requestButton;
-
-    // emergency panel (v1)
-    private EmergencyButtonPanel emergencyPanel;
-
-    // classic list's backing results (v1)
-    private List<Ride> searchResults = new ArrayList<>();
-
-    // -------- HISTORY --------
+    private JTable historyTable;
     private DefaultTableModel historyModel;
 
-    // -------- Constructors --------
+    private Passenger passenger;
 
-    /** Legacy-style constructor (v1) that accepts local rides and does NOT require login. */
-    public PassengerGUI(List<Ride> rides) {
-        this.providedRides = (rides != null) ? rides : new ArrayList<>();
-        initUI(/*allowBackend=*/CurrentUser.loggedInUser != null);
-    }
-
-    /** Modern constructor (v2) expecting a logged-in user (but still works if not). */
     public PassengerGUI() {
-        initUI(/*allowBackend=*/CurrentUser.loggedInUser != null);
-    }
+        String name = (CurrentUser.loggedInUser != null) ? CurrentUser.getName() : "Guest";
+        this.passenger = new Passenger(name);
 
-    // -------- UI Setup --------
-    private void initUI(boolean allowBackend) {
-        setTitle("Passenger Dashboard");
-        setSize(900, 600);
+        setTitle("Passenger Portal - " + name);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
 
-        JTabbedPane tabs = new JTabbedPane();
-        tabs.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        add(tabs);
+        tabbedPane = new JTabbedPane();
 
-        // ===================== TAB 1: SEARCH =====================
-        JPanel searchPanel = new JPanel(new BorderLayout(15, 15));
-        searchPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-        tabs.addTab("Search Rides", searchPanel);
+        createSearchTab();
+        tabbedPane.addTab("Search Rides", searchPanel);
 
-        // Top search bar
-        JPanel searchBar = new JPanel(new FlowLayout());
-        searchBar.add(new JLabel("Search (location/time/destination): "));
-        searchField = new JTextField(25);
-        JButton searchButton = new JButton("Search");
-        searchButton.setFont(new Font("Segoe UI", Font.BOLD, 16));
-        searchBar.add(searchField);
-        searchBar.add(searchButton);
-        searchPanel.add(searchBar, BorderLayout.NORTH);
+        createHistoryTab();
+        tabbedPane.addTab("My History", historyPanel);
 
-        // Center split: left modern results (cards), right classic list (v1)
-        JSplitPane split = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT);
-        split.setResizeWeight(0.6);
+        if (CurrentUser.loggedInUser != null) {
+            JPanel profileWrapper = new JPanel(new BorderLayout());
+            JButton openProfileBtn = new JButton("Open My Full Profile");
+            openProfileBtn.addActionListener(e -> new ViewProfileGUI(CurrentUser.loggedInUser).setVisible(true));
+            
+            JPanel center = new JPanel(new GridBagLayout());
+            center.add(openProfileBtn);
+            profileWrapper.add(center);
+            tabbedPane.addTab("My Profile", profileWrapper);
+        }
 
-        // Modern card container (left)
-        resultsContainer = new JPanel();
-        resultsContainer.setLayout(new BoxLayout(resultsContainer, BoxLayout.Y_AXIS));
-        JScrollPane cardsScroll = new JScrollPane(resultsContainer);
-        cardsScroll.setBorder(BorderFactory.createTitledBorder("Matching Ride Cards"));
+        add(tabbedPane);
+    }
 
-        // Classic list (right) from v1
-        JPanel classicPanel = new JPanel(new BorderLayout(8, 8));
-        classicPanel.setBorder(BorderFactory.createTitledBorder("Matching Rides (Classic List)"));
-        resultsModel = new DefaultListModel<>();
-        resultsList = new JList<>(resultsModel);
-        resultsList.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        classicPanel.add(new JScrollPane(resultsList), BorderLayout.CENTER);
+    public PassengerGUI(List<Ride> rides) {
+        this();
+    }
 
-        split.setLeftComponent(cardsScroll);
-        split.setRightComponent(classicPanel);
-        searchPanel.add(split, BorderLayout.CENTER);
+    private void createSearchTab() {
+        searchPanel = new JPanel(new BorderLayout(10, 10));
+        searchPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Bottom bar: left "Request Selected Ride" (v1) + right Emergency panel (v1)
-        JPanel bottomBar = new JPanel(new BorderLayout(10, 0));
+        JPanel topBar = new JPanel(new BorderLayout(5, 5));
+        searchField = new JTextField();
+        JButton searchBtn = new JButton("Search");
+        searchBtn.addActionListener(e -> performSearch());
+        topBar.add(new JLabel("Destination/Start: "), BorderLayout.WEST);
+        topBar.add(searchField, BorderLayout.CENTER);
+        topBar.add(searchBtn, BorderLayout.EAST);
+        searchPanel.add(topBar, BorderLayout.NORTH);
 
-        requestButton = new JButton("Request Selected Ride");
-        requestButton.setEnabled(false);
-        bottomBar.add(requestButton, BorderLayout.WEST);
+        searchListModel = new DefaultListModel<>();
+        searchResultsList = new JList<>(searchListModel);
+        searchPanel.add(new JScrollPane(searchResultsList), BorderLayout.CENTER);
 
+        JPanel bottomBar = new JPanel(new BorderLayout());
+        JButton requestBtn = new JButton("Request Selected Ride");
+        requestBtn.addActionListener(e -> requestSelectedRide());
+        bottomBar.add(requestBtn, BorderLayout.WEST);
 
+        if (CurrentUser.loggedInUser != null) {
+            EmergencyButtonPanel emergencyPanel = new EmergencyButtonPanel(
+                    CurrentUser.getName(), 
+                    CurrentUser.loggedInUser.getPhone(), 
+                    "NO_RIDE_SELECTED"
+            );
+            
+            searchResultsList.addListSelectionListener(e -> {
+                int idx = searchResultsList.getSelectedIndex();
+                if (idx >= 0 && idx < currentSearchRides.size()) {
+                    Ride r = currentSearchRides.get(idx);
+                    emergencyPanel.setRideId(String.valueOf(r.getId()));
+                }
+            });
+            
+            bottomBar.add(emergencyPanel, BorderLayout.EAST);
+        }
 
-        String userNameForEmergency = (CurrentUser.loggedInUser != null)
-                ? CurrentUser.loggedInUser.getfName()
-                : passenger.getName();
-        String userPhoneForEmergency = "N/A"; // placeholder unless you have it
-        emergencyPanel = new EmergencyButtonPanel(
-                userNameForEmergency,
-                userPhoneForEmergency,
-                "NO_SELECTION" // updated on list selection
-        );
-        bottomBar.add(emergencyPanel, BorderLayout.EAST);
         searchPanel.add(bottomBar, BorderLayout.SOUTH);
-
-        // Wire actions
-        searchButton.addActionListener(e -> searchRides(allowBackend));
-        resultsList.addListSelectionListener(e -> {
-            boolean hasSel = !resultsList.isSelectionEmpty();
-            requestButton.setEnabled(hasSel);
-            if (hasSel) {
-                int idx = resultsList.getSelectedIndex();
-                if (idx >= 0 && idx < searchResults.size()) {
-                    Ride r = searchResults.get(idx);
-                    emergencyPanel.setRideId(String.valueOf(r.getId())); // keep it updated
-                }
-            } else {
-                emergencyPanel.setRideId("NO_SELECTION");
-            }
-        });
-
-        requestButton.addActionListener(e -> requestSelectedRide(allowBackend));
-
-        // If backend allowed, load rides; otherwise we rely on providedRides
-        if (allowBackend) {
-            loadAllRides();
-        }
-
-        // ===================== TAB 2: HISTORY =====================
-        JPanel histPanel = new JPanel(new BorderLayout(15, 15));
-        histPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
-        tabs.addTab("Ride History", histPanel);
-
-        JLabel historyLabel = new JLabel("Your Completed Rides");
-        historyLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
-        histPanel.add(historyLabel, BorderLayout.NORTH);
-
-        String[] cols = {"Date", "From", "To", "Price"};
-        historyModel = new DefaultTableModel(cols, 0);
-        JTable historyTable = new JTable(historyModel);
-        historyTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        historyTable.setRowHeight(24);
-        histPanel.add(new JScrollPane(historyTable), BorderLayout.CENTER);
-
-        // ===================== TAB 3: MY PROFILE =====================
-        JPanel profilePlaceholderPanel = new JPanel();
-        tabs.addTab("My Profile", profilePlaceholderPanel);
-
-        // Tab change behavior (load history; open profile as window)
-        tabs.addChangeListener(e -> {
-            int selectedIndex = tabs.getSelectedIndex();
-
-            if (selectedIndex == 1) { // Ride History
-                if (CurrentUser.loggedInUser != null) {
-                    loadRideHistory();
-                } else {
-                    historyModel.setRowCount(0);
-                    historyModel.addRow(new Object[]{"Login required", "", "", ""});
-                }
-            } else if (selectedIndex == 2) { // My Profile
-                if (CurrentUser.loggedInUser != null) {
-                    new ViewProfileGUI(CurrentUser.loggedInUser);
-                } else {
-                    JOptionPane.showMessageDialog(this, "You must be logged in to view your profile.");
-                }
-                // Return to Search tab
-                tabs.setSelectedIndex(0);
-            }
-        });
-
-        setVisible(true);
+        performSearch();
     }
 
-    // ===================== BACKEND: Load all rides =====================
-    private void loadAllRides() {
-        try {
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/api/rides"))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response =
-                    httpClient.send(req, HttpResponse.BodyHandlers.ofString());
-
-            Ride[] rides = gson.fromJson(response.body(), Ride[].class);
-
-            allRides.clear();
-            if (rides != null) {
-                for (Ride r : rides) {
-                    allRides.add(r);
-                }
-            }
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Could not load rides from server.");
+    private void performSearch() {
+        String query = searchField.getText().trim();
+        List<Ride> results = passenger.searchRides(query);
+        currentSearchRides = results;
+        searchListModel.clear();
+        for (Ride r : results) {
+            searchListModel.addElement(r.toString());
         }
     }
 
-    // ===================== SEARCH (merged) =====================
-    private void searchRides(boolean allowBackend) {
-        String q = searchField.getText().trim().toLowerCase();
-
-        // Clear UI containers
-        resultsContainer.removeAll();
-        resultsModel.clear();
-        filtered.clear();
-        searchResults.clear();
-
-        if (q.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Enter a search term.");
-            resultsContainer.revalidate();
-            resultsContainer.repaint();
+    private void requestSelectedRide() {
+        int idx = searchResultsList.getSelectedIndex();
+        if (idx < 0) {
+            JOptionPane.showMessageDialog(this, "Please select a ride first.");
             return;
         }
-
-        // Build the data set: backend rides + provided local rides (avoid duplicates by id if possible)
-        List<Ride> source = new ArrayList<>();
-        if (allowBackend) source.addAll(allRides);
-        if (providedRides != null) source.addAll(providedRides);
-
-        for (Ride r : source) {
-            try {
-                String from = (r.getStartLocation() != null) ? r.getStartLocation() : "";
-                String to = (r.getDestination() != null) ? r.getDestination() : "";
-                String time = (r.getDepartureTime() != null) ? r.getDepartureTime() : "";
-
-                if (from.toLowerCase().contains(q)
-                        || to.toLowerCase().contains(q)
-                        || time.toLowerCase().contains(q)) {
-
-                    // modern cards
-                    filtered.add(r);
-                    resultsContainer.add(createRideCard(r, allowBackend));
-
-                    // classic list
-                    searchResults.add(r);
-                    resultsModel.addElement(r.toString());
-                }
-            } catch (Exception ignore) {
-                // keep searching other rides
-            }
-        }
-
-        if (filtered.isEmpty()) {
-            JLabel noRes = new JLabel("No rides found.");
-            noRes.setFont(new Font("Segoe UI", Font.BOLD, 18));
-            resultsContainer.add(noRes);
-
-            resultsModel.addElement("No rides found for: " + q);
-            requestButton.setEnabled(false);
-        }
-
-        resultsContainer.revalidate();
-        resultsContainer.repaint();
-    }
-
-    // ===================== RIDE CARD UI (modern) =====================
-    private JPanel createRideCard(Ride r, boolean allowBackend) {
-        JPanel card = new JPanel(new BorderLayout());
-        card.setBorder(BorderFactory.createCompoundBorder(
-                BorderFactory.createLineBorder(Color.LIGHT_GRAY),
-                new EmptyBorder(12, 12, 12, 12)
-        ));
-        card.setMaximumSize(new Dimension(750, 150));
-        card.setBackground(new Color(250, 250, 250));
-
-        JLabel title = new JLabel(safe(r.getStartLocation()) + " \u2192 " + safe(r.getDestination()));
-        title.setFont(new Font("Segoe UI", Font.BOLD, 18));
-
-        JLabel time = new JLabel("Departure: " + safe(r.getDepartureTime()));
-        time.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
-        JLabel price = new JLabel("Price: $" + r.getPrice());
-        price.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
-        JPanel info = new JPanel(new GridLayout(3, 1));
-        info.setOpaque(false);
-        info.add(title);
-        info.add(time);
-        info.add(price);
-
-        card.add(info, BorderLayout.CENTER);
-
-        JButton requestBtn = new JButton("Request Ride");
-        requestBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
-        requestBtn.setPreferredSize(new Dimension(120, 30));
-        requestBtn.setFocusPainted(false);
-        requestBtn.setBackground(Color.WHITE);
-        requestBtn.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));
-
-        requestBtn.addActionListener(e -> {
-            if (allowBackend && CurrentUser.loggedInUser != null) {
-                sendRideRequest(r); // backend POST
-            } else {
-                requestRideLegacy(r); // local addRequest flow
-            }
-        });
-
-        JPanel buttonPanel = new JPanel();
-        buttonPanel.setOpaque(false);
-        buttonPanel.add(requestBtn);
-        card.add(buttonPanel, BorderLayout.SOUTH);
-
-        return card;
-    }
-
-    private static String safe(String s) {
-        return (s == null) ? "" : s;
-    }
-
-    // ===================== Classic "Request Selected Ride" (v1) =====================
-    private void requestSelectedRide(boolean allowBackend) {
-        int selectedIndex = resultsList.getSelectedIndex();
-        if (selectedIndex == -1 || searchResults.isEmpty()) {
-            JOptionPane.showMessageDialog(this, "Select a ride to request!");
-            return;
-        }
-
-        Ride selectedRide = searchResults.get(selectedIndex);
-        if (allowBackend && CurrentUser.loggedInUser != null) {
-            sendRideRequest(selectedRide);
+        Ride r = currentSearchRides.get(idx);
+        boolean success = passenger.sendRideRequest(r);
+        if (success) {
+            JOptionPane.showMessageDialog(this, "Request sent successfully!");
         } else {
-            requestRideLegacy(selectedRide);
+            JOptionPane.showMessageDialog(this, "Failed to send request. It may already exist.");
         }
     }
 
-    // ===================== Legacy local request (v1) =====================
-    private void requestRideLegacy(Ride ride) {
-        try {
-        	RideRequest request = new RideRequest(0L, passenger.getName());
+    private void createHistoryTab() {
+        historyPanel = new JPanel(new BorderLayout(10, 10));
+        historyPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-            ride.addRequest(request);
-
-            JOptionPane.showMessageDialog(this,
-                    "Ride request sent to driver for: " + ride.getDestination(),
-                    "Request Sent",
-                    JOptionPane.INFORMATION_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Failed to send local request.");
-        }
-    }
-
-    // ===================== Backend send request (v2) =====================
-    private void sendRideRequest(Ride ride) {
-        try {
-            long passengerId = CurrentUser.loggedInUser.getID();
-            String passengerName = CurrentUser.loggedInUser.getfName();
-
-            RideRequest reqBody = new RideRequest(passengerId, passengerName);
-            String json = gson.toJson(reqBody);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/api/rides/" + ride.getId() + "/request"))
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                    .header("Content-Type", "application/json")
-                    .build();
-
-            httpClient.send(request, HttpResponse.BodyHandlers.ofString());
-
-            JOptionPane.showMessageDialog(this, "Ride request sent!");
-        } catch (Exception ex) {
-            ex.printStackTrace();
-            JOptionPane.showMessageDialog(this, "Failed to send request.");
-        }
-    }
-
-    // ===================== Load passenger ride history (v2) =====================
-    private void loadRideHistory() {
-        try {
-            long passengerId = CurrentUser.loggedInUser.getID();
-
-            URL url = new URL("http://localhost:8080/api/history/passenger/" + passengerId);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-
-            String json;
-            try (BufferedReader br = new BufferedReader(new InputStreamReader(conn.getInputStream()))) {
-                json = br.lines().collect(Collectors.joining());
+        String[] columns = {"Date", "Start", "Destination", "Price", "DriverID", "Action"};
+        
+        historyModel = new DefaultTableModel(columns, 0) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return column == 5;
             }
+        };
 
-            Ride[] rides = gson.fromJson(json, Ride[].class);
+        historyTable = new JTable(historyModel);
+        
+        historyTable.getColumnModel().getColumn(4).setMinWidth(0);
+        historyTable.getColumnModel().getColumn(4).setMaxWidth(0);
+        historyTable.getColumnModel().getColumn(4).setWidth(0);
 
-            historyModel.setRowCount(0);
+        historyTable.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
+        historyTable.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox()));
 
-            if (rides == null || rides.length == 0) {
-                historyModel.addRow(new Object[]{"No rides", "", "", ""});
-                return;
-            }
+        historyPanel.add(new JScrollPane(historyTable), BorderLayout.CENTER);
 
-            for (Ride r : rides) {
+        JButton refreshBtn = new JButton("Refresh History");
+        refreshBtn.addActionListener(e -> loadPassengerHistory());
+        historyPanel.add(refreshBtn, BorderLayout.SOUTH);
+        
+        loadPassengerHistory();
+    }
+
+    private void loadPassengerHistory() {
+        if (CurrentUser.loggedInUser == null) return;
+
+        Ride[] history = RideService.getInstance().getPassengerHistory(CurrentUser.getId());
+        historyModel.setRowCount(0);
+
+        if (history != null) {
+            for (Ride r : history) {
+                String driverIdStr = (r.getDriverId() != null) ? String.valueOf(r.getDriverId()) : "0";
+                String actionText = r.getStatus();
+
+                // CHANGED LOGIC: Allow rating if Approved OR Completed
+                boolean isRateable = "APPROVED".equalsIgnoreCase(r.getStatus()) || 
+                                     "COMPLETED".equalsIgnoreCase(r.getStatus());
+
+                if (isRateable && r.getDriverId() != null) {
+                    actionText = "Rate Driver";
+                }
+
                 historyModel.addRow(new Object[]{
                         r.getDate(),
                         r.getStartLocation(),
                         r.getDestination(),
-                        "$" + r.getPrice()
+                        "$" + r.getPrice(),
+                        driverIdStr,
+                        actionText
                 });
             }
-
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error loading history.");
         }
     }
 
-    // ===================== v1 test harness main =====================
-    public static void main(String[] args) {
-        // For quick local testing (legacy mode) without login/server:
-        List<Ride> rides = new ArrayList<>();
-        rides.add(new Ride("UTSC", "Downtown", "9:00 AM", 3, 10.0));
-        rides.add(new Ride("Scarborough", "Mississauga", "8:30 AM", 2, 12.5));
+    class ButtonRenderer extends JButton implements TableCellRenderer {
+        public ButtonRenderer() {
+            setOpaque(true);
+        }
+        @Override
+        public Component getTableCellRendererComponent(JTable table, Object value,
+                                                       boolean isSelected, boolean hasFocus, int row, int column) {
+            if (value == null) {
+                setText("");
+                setEnabled(false);
+            } else {
+                setText(value.toString());
+                setEnabled("Rate Driver".equals(value.toString()));
+            }
+            return this;
+        }
+    }
 
-        SwingUtilities.invokeLater(() -> new PassengerGUI(rides));
+    class ButtonEditor extends DefaultCellEditor {
+        private JButton button;
+        private String label;
+        private boolean isPushed;
+        private int currentRow;
+
+        public ButtonEditor(JCheckBox checkBox) {
+            super(checkBox);
+            button = new JButton();
+            button.setOpaque(true);
+            button.addActionListener(e -> fireEditingStopped());
+        }
+
+        @Override
+        public Component getTableCellEditorComponent(JTable table, Object value,
+                                                     boolean isSelected, int row, int column) {
+            label = (value == null) ? "" : value.toString();
+            button.setText(label);
+            isPushed = true;
+            currentRow = row;
+            return button;
+        }
+
+        @Override
+        public Object getCellEditorValue() {
+            if (isPushed && "Rate Driver".equals(label)) {
+                String driverIdStr = (String) historyTable.getValueAt(currentRow, 4);
+                Long driverId = Long.parseLong(driverIdStr);
+
+                SwingUtilities.invokeLater(() -> showRatingDialog(driverId));
+            }
+            isPushed = false;
+            return label;
+        }
+
+        @Override
+        public boolean stopCellEditing() {
+            isPushed = false;
+            return super.stopCellEditing();
+        }
+
+        private void showRatingDialog(Long driverId) {
+            String input = JOptionPane.showInputDialog(button, 
+                "Rate this driver (1.0 - 5.0):", "Rate Ride", JOptionPane.QUESTION_MESSAGE);
+            
+            if (input != null && !input.isEmpty()) {
+                try {
+                    double rating = Double.parseDouble(input);
+                    if (rating < 1.0 || rating > 5.0) {
+                        JOptionPane.showMessageDialog(button, "Please enter a value between 1.0 and 5.0");
+                    } else {
+                        boolean ok = RideService.getInstance().rateDriver(driverId, rating);
+                        if (ok) {
+                            JOptionPane.showMessageDialog(button, "Rating submitted! Thank you.");
+                        } else {
+                            JOptionPane.showMessageDialog(button, "Failed to submit. You may have already rated this ride.");
+                        }
+                    }
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(button, "Invalid number format.");
+                }
+            }
+        }
     }
 }

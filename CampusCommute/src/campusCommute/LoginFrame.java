@@ -10,13 +10,7 @@ import java.awt.*;
 
 /**
  * LoginFrame
- *
- * Fully backend-synced login:
- * - Sends email/password to backend
- * - Receives full Person object
- * - Stores in CurrentUser.loggedInUser
- * - Opens correct GUI based on userType
- * - **Provides a choice for drivers**
+ * Handles user login and routing to the correct dashboard.
  */
 public class LoginFrame extends JFrame {
 
@@ -56,14 +50,10 @@ public class LoginFrame extends JFrame {
         setContentPane(form);
         pack();
         setLocationRelativeTo(null);
-        // --- FIX ---
-        // Changed to DISPOSE_ON_CLOSE so it doesn't kill the app
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
     }
 
-    // ============================================================
-    // LOGIN LOGIC
-    // ============================================================
+    // Handles the login process
     private void performLogin() {
         String email = emailField.getText().trim();
         String password = new String(passwordField.getPassword()).trim();
@@ -91,24 +81,24 @@ public class LoginFrame extends JFrame {
                 return;
             }
 
+            // Parse the user and save to session
             Person loggedIn = gson.fromJson(response.body(), Person.class);
             CurrentUser.loggedInUser = loggedIn;
 
             JOptionPane.showMessageDialog(this, "Welcome " + loggedIn.getfName() + "!");
 
-            dispose();
-
-            // --- MODIFIED SECTION ---
-            // OPEN APPROPRIATE GUI
+            // Route based on user type
             if (loggedIn.getUserType().equalsIgnoreCase("driver")) {
-                // Give the driver a choice
                 showDriverOptions();
-                
+                dispose(); 
+
             } else if (loggedIn.getUserType().equalsIgnoreCase("user")) {
-                new PassengerGUI();
-                
+                // FIX: Make sure the window is visible before disposing this one
+                new PassengerGUI().setVisible(true);
+                dispose(); 
+
             } else {
-                // "both" userType
+                // "both" userType - ask them what they want to do
                 Object choice = JOptionPane.showInputDialog(
                         this,
                         "Choose mode:",
@@ -120,51 +110,42 @@ public class LoginFrame extends JFrame {
                 );
 
                 if ("Driver".equals(choice)) {
-                    // Give the driver a choice
                     showDriverOptions();
                 } else {
-                    new PassengerGUI();
+                    // FIX: Make visible
+                    new PassengerGUI().setVisible(true);
                 }
+                dispose(); 
             }
-            // --- END OF MODIFIED SECTION ---
 
         } catch (Exception ex) {
+            ex.printStackTrace();
             JOptionPane.showMessageDialog(this, "Server error: " + ex.getMessage());
         }
     }
 
-    // ============================================================
-    // --- NEW HELPER METHOD FOR DRIVER CHOICE ---
-    // ============================================================
-    /**
-     * Shows a popup dialog asking the driver what they want to do.
-     */
+    // Shows options for drivers
     private void showDriverOptions() {
         String[] options = {"Manage My Rides", "Post a New Ride"};
         
-        // Show the dialog
         Object choice = JOptionPane.showInputDialog(
-                null, // Parent component (null centers on screen)
-                "What would you like to do?", // Message
-                "Driver Menu", // Title
+                null, 
+                "What would you like to do?", 
+                "Driver Menu", 
                 JOptionPane.QUESTION_MESSAGE,
                 null,
-                options, // The array of choices
-                options[0] // Default choice
+                options, 
+                options[0] 
         );
 
-        // Handle the choice
+        // FIX: Ensure these windows are also set to visible
         if ("Manage My Rides".equals(choice)) {
-            new DriverGUI();
+            new DriverGUI().setVisible(true);
         } else if ("Post a New Ride".equals(choice)) {
-            new CampusCommuteGUI();
+            new CampusCommuteGUI().setVisible(true);
         }
-        // If they click "Cancel" (choice is null), nothing happens, which is fine.
     }
 
-    // ============================================================
-    // HELPERS
-    // ============================================================
     private static void addRow(JPanel panel, GridBagConstraints base, int row, String label, JComponent field) {
         GridBagConstraints gcLabel = (GridBagConstraints) base.clone();
         gcLabel.gridx = 0; gcLabel.gridy = row;

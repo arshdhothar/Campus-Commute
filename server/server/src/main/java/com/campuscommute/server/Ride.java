@@ -24,12 +24,17 @@ public class Ride {
     private int availableSeats;
     private double price;
 
+    // Transient field to send the driver's rating to frontend without saving to DB
+    @Transient
+    private double driverRating;
+
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<RideRequest> requests = new ArrayList<>();
 
     public Ride() {}
 
+    // Getters
     public Long getId() { return id; }
     public Long getPassengerId() { return passengerId; }
     public Long getDriverId() { return driverId; }
@@ -42,7 +47,10 @@ public class Ride {
     public int getAvailableSeats() { return availableSeats; }
     public double getPrice() { return price; }
     public List<RideRequest> getRequests() { return requests; }
+    
+    public double getDriverRating() { return driverRating; }
 
+    // Setters
     public void setPassengerId(Long passengerId) { this.passengerId = passengerId; }
     public void setDriverId(Long driverId) { this.driverId = driverId; }
     public void setStatus(String status) { this.status = status; }
@@ -52,16 +60,7 @@ public class Ride {
     public void setDepartureTime(String departureTime) { this.departureTime = departureTime; }
     public void setAvailableSeats(int availableSeats) { this.availableSeats = availableSeats; }
     public void setPrice(double price) { this.price = price; }
-
-    public void acceptRide(Long driverId, Long passengerId) {
-        this.driverId = driverId;
-        this.passengerId = passengerId;
-        this.status = "COMPLETED";
-        this.date = java.time.LocalDate.now().toString();
-    }
-
-    public void addRequest(RideRequest request) {
-        requests.add(request);
-        request.setRide(this);
-    }
+    public void setRequests(List<RideRequest> requests) { this.requests = requests; }
+    
+    public void setDriverRating(double driverRating) { this.driverRating = driverRating; }
 }

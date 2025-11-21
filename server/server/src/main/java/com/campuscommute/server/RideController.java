@@ -1,8 +1,12 @@
 package com.campuscommute.server;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.util.List;
+import java.util.ArrayList;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("/api")
@@ -14,7 +18,6 @@ public class RideController {
     @Autowired
     private RideRequestRepository rideRequestRepository;
     
-    // This is required for the new notification logic
     @Autowired
     private PersonRepository personRepository;
 
@@ -33,7 +36,15 @@ public class RideController {
     // ---------------------------------------------------------
     @GetMapping("/rides")
     public List<Ride> getAllRides() {
-        return rideRepository.findAll();
+        List<Ride> rides = rideRepository.findAll();
+        for (Ride r : rides) {
+            if (r.getDriverId() != null) {
+                personRepository.findById(r.getDriverId()).ifPresent(driver -> {
+                    r.setDriverRating(driver.getAverageRating());
+                });
+            }
+        }
+        return rides;
     }
 
     // ---------------------------------------------------------
@@ -41,90 +52,98 @@ public class RideController {
     // ---------------------------------------------------------
     @GetMapping("/rides/driver/{driverId}")
     public List<Ride> getDriverRides(@PathVariable Long driverId) {
-        return rideRepository.findByDriverId(driverId);
+        List<Ride> rides = rideRepository.findByDriverId(driverId);
+        personRepository.findById(driverId).ifPresent(driver -> {
+            double rating = driver.getAverageRating();
+            for (Ride r : rides) {
+                r.setDriverRating(rating);
+            }
+        });
+        return rides;
     }
 
     // ---------------------------------------------------------
-    // 4. PASSENGER SENDS RIDE REQUEST
+    // 4. SEND RIDE REQUEST
     // ---------------------------------------------------------
     @PostMapping("/rides/{rideId}/request")
-    public RideRequest addRequest(
-            @PathVariable Long rideId,
-            @RequestBody RideRequest request) {
+    public ResponseEntity<String> sendRequest(@PathVariable Long rideId, @RequestBody RideRequest request) {
+        Optional<Ride> rideOpt = rideRepository.findById(rideId);
+        if (rideOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ride not found");
+        }
 
-        Ride ride = rideRepository.findById(rideId).orElse(null);
-        if (ride == null) return null;
-
+        Ride ride = rideOpt.get();
         request.setRide(ride);
         request.setStatus("PENDING");
-
-        return rideRequestRepository.save(request);
+        
+        rideRequestRepository.save(request);
+        return ResponseEntity.ok("Request sent");
     }
 
     // ---------------------------------------------------------
-    // 5. VIEW REQUESTS FOR RIDE
+    // 5. HANDLE REQUEST (Approve/Deny)
     // ---------------------------------------------------------
-    @GetMapping("/rides/{rideId}/requests")
-    public List<RideRequest> getRideRequests(@PathVariable Long rideId) {
-        return rideRequestRepository.findByRideId(rideId);
-    }
+    @PostMapping("/requests/{reqId}/status")
+    public ResponseEntity<String> handleRequestStatus(@PathVariable Long reqId, @RequestBody String status) {
+        String cleanStatus = status.replace("\"", "").trim();
 
+        Optional<RideRequest> reqOpt = rideRequestRepository.findById(reqId);
+        if (reqOpt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Request not found");
+        }
 
-    // ---------------------------------------------------------
-    // 6. DRIVER ACCEPTS REQUEST (MODIFIED)
-    // ---------------------------------------------------------
-    @PostMapping("/ride/{rideId}/accept")
-    public Ride acceptRide(
-            @PathVariable Long rideId,
-            @RequestParam Long driverId,
-            @RequestParam Long passengerId,
-            @RequestParam Long requestId) {
-
-        Ride ride = rideRepository.findById(rideId).orElse(null);
-        if (ride == null) return null;
-
-        RideRequest req = rideRequestRepository.findById(requestId).orElse(null);
-        if (req == null) return null;
-
-        // Update the request status
-        req.setStatus("APPROVED");
+        RideRequest req = reqOpt.get();
+        req.setStatus(cleanStatus);
         rideRequestRepository.save(req);
 
-        // Update the ride status
-        ride.acceptRide(driverId, passengerId);
-        Ride savedRide = rideRepository.save(ride);
-
-        // --- NEW LOGIC FOR USER STORY 15 (AC #3) ---
-        try {
-            // Find the passenger who needs to be notified
-            Person passenger = personRepository.findById(passengerId).orElse(null);
-
-            // Check their notification preference
-            if (passenger != null && passenger.isNotifyOnConfirmation()) {
-                // This is where you would put your email/SMS sending logic
-                System.out.println("NOTIFICATION: Sending 'Ride Confirmation' alert to: " + passenger.getEmail());
-            } else if (passenger != null) {
-                System.out.println("NOTIFICATION: User " + passenger.getEmail() + " has disabled confirmation alerts.");
+        if ("APPROVED".equalsIgnoreCase(cleanStatus)) {
+            Ride ride = req.getRide();
+            if (ride.getAvailableSeats() > 0) {
+                ride.setAvailableSeats(ride.getAvailableSeats() - 1);
+                rideRepository.save(ride);
             }
-        } catch (Exception e) {
-            // Don't let a notification failure stop the API call
-            System.err.println("Error sending notification: " + e.getMessage());
+            
+            // Notification placeholder
+            Person passenger = personRepository.findById(req.getPassengerId()).orElse(null);
+            if (passenger != null && passenger.isNotifyOnConfirmation()) {
+                System.out.println("NOTIFICATION: Sending confirmation to " + passenger.getEmail());
+            }
         }
-        // --- END OF NEW LOGIC ---
 
-        return savedRide; // Return the ride to the driver
+        return ResponseEntity.ok("Status updated to " + cleanStatus);
     }
 
     // ---------------------------------------------------------
-    // 7. PASSENGER HISTORY
+    // 6. PASSENGER HISTORY (UPDATED)
     // ---------------------------------------------------------
     @GetMapping("/history/passenger/{id}")
     public List<Ride> getPassengerHistory(@PathVariable Long id) {
-        return rideRepository.findByPassengerIdAndStatus(id, "COMPLETED");
+        // Look up the requests the passenger has made
+        List<RideRequest> requests = rideRequestRepository.findByPassengerId(id);
+        List<Ride> history = new ArrayList<>();
+
+        for (RideRequest req : requests) {
+            // If the request is APPROVED, add it to history so they can rate
+            if ("APPROVED".equalsIgnoreCase(req.getStatus()) || "COMPLETED".equalsIgnoreCase(req.getStatus())) {
+                Ride ride = req.getRide();
+                
+                // Set status to match request so frontend enables button
+                ride.setStatus(req.getStatus()); 
+
+                // Add driver rating info
+                if (ride.getDriverId() != null) {
+                    personRepository.findById(ride.getDriverId()).ifPresent(driver -> {
+                        ride.setDriverRating(driver.getAverageRating());
+                    });
+                }
+                history.add(ride);
+            }
+        }
+        return history;
     }
 
     // ---------------------------------------------------------
-    // 8. DRIVER HISTORY
+    // 7. DRIVER HISTORY
     // ---------------------------------------------------------
     @GetMapping("/history/driver/{id}")
     public List<Ride> getDriverHistory(@PathVariable Long id) {

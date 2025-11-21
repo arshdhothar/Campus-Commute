@@ -21,12 +21,14 @@ public class Person {
 	
 	private String photoPath;
 	
-	// --- NEW FIELDS FOR US15 ---
 	private boolean notifyOnConfirmation = true;
 	private boolean notifyOnCancellation = true;
 	private boolean notifyOnReminder = true;
 
-	// A default constructor is required by JPA
+    // New fields for the rating system
+    private double averageRating = 0.0;
+    private int ratingCount = 0;
+
 	public Person() {
 	}
 
@@ -42,8 +44,6 @@ public class Person {
 		this.userType = userType;
 	}
 
-	// --- Getters and setters ---
-
 	public Long getID() {
 		return ID;
 	}
@@ -58,6 +58,14 @@ public class Person {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
 	public String getfName() {
@@ -80,8 +88,8 @@ public class Person {
 		return DOB;
 	}
 
-	public void setDOB(String DOB) {
-		this.DOB = DOB;
+	public void setDOB(String dOB) {
+		this.DOB = dOB;
 	}
 
 	public String getPassword() {
@@ -92,19 +100,11 @@ public class Person {
 		this.password = password;
 	}
 
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-
-	public String getaddress() {
+	public String getAddress() {
 		return address;
 	}
 
-	public void setaddress(String address) {
+	public void setAddress(String address) {
 		this.address = address;
 	}
 
@@ -147,8 +147,6 @@ public class Person {
 	public void setPhotoPath(String photoPath) {
 		this.photoPath = photoPath;
 	}
-
-	// --- NEW GETTERS/SETTERS FOR US15 ---
 	
 	public boolean isNotifyOnConfirmation() {
 		return notifyOnConfirmation;
@@ -173,4 +171,21 @@ public class Person {
 	public void setNotifyOnReminder(boolean notifyOnReminder) {
 		this.notifyOnReminder = notifyOnReminder;
 	}
+
+    // Getters and setters for the new rating fields
+    public double getAverageRating() {
+        return averageRating;
+    }
+
+    public void setAverageRating(double averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public int getRatingCount() {
+        return ratingCount;
+    }
+
+    public void setRatingCount(int ratingCount) {
+        this.ratingCount = ratingCount;
+    }
 }
