@@ -4,7 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * Frontend Ride model — must match backend Ride entity exactly.
+ * Frontend Ride model — now includes driverRating for display in search results.
  */
 public class Ride {
 
@@ -20,15 +20,14 @@ public class Ride {
     private String departureTime;
     private int availableSeats;
     private double price;
+    private double driverRating; 
 
     private List<RideRequest> requests;
 
-    // Empty constructor for Gson
     public Ride() {
         this.requests = new ArrayList<>();
     }
 
-    // Constructor used when posting a ride from frontend
     public Ride(String startLocation, String destination, String departureTime,
                 int availableSeats, double price) {
 
@@ -59,6 +58,9 @@ public class Ride {
 
     public List<RideRequest> getRequests() { return requests; }
 
+    // --- NEW GETTER ---
+    public double getDriverRating() { return driverRating; }
+
     // -------------------------
     // SETTERS
     // -------------------------
@@ -77,6 +79,9 @@ public class Ride {
 
     public void setRequests(List<RideRequest> requests) { this.requests = requests; }
 
+    // --- NEW SETTER ---
+    public void setDriverRating(double driverRating) { this.driverRating = driverRating; }
+
     public void addRequest(RideRequest request) {
         if (this.requests == null) this.requests = new ArrayList<>();
         this.requests.add(request);
@@ -87,9 +92,13 @@ public class Ride {
     // -------------------------
     @Override
     public String toString() {
+        // Format the rating string (e.g., " ★ 4.5") or empty if 0
+        String ratingStr = (driverRating > 0) ? String.format(" | ★ %.1f", driverRating) : "";
+
         return startLocation + " -> " + destination +
                " @ " + departureTime +
                " | Seats: " + availableSeats +
-               " | $" + price;
+               " | $" + price +
+               ratingStr; // Append the rating to the display
     }
 }

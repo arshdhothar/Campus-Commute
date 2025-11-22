@@ -4,13 +4,9 @@ import com.google.gson.annotations.SerializedName;
 
 /**
  * Frontend data model for a Person.
- * This class must mirror the fields in the backend Person entity
- * to ensure Gson can serialize and deserialize objects correctly.
  */
 public class Person {
     
-    // This tells Gson to use "id" (lowercase) in the JSON
-    // for both reading and writing, fixing the sign-up bug.
     @SerializedName("id")
 	private Long ID; 
     
@@ -19,17 +15,20 @@ public class Person {
 	private String bio;
 	private String photoPath;
 
-    // --- NEW FIELDS FOR US15 ---
+    // Notification settings
     private boolean notifyOnConfirmation;
     private boolean notifyOnCancellation;
     private boolean notifyOnReminder;
+
+    // --- NEW FIELDS FOR RATING SYSTEM ---
+    private double averageRating = 0.0;
+    private int ratingCount = 0;
 
 	// -----------------------------------------------------------------
     // CONSTRUCTORS
     // -----------------------------------------------------------------
 
 	public Person() {
-		
 	}
 
 	public Person(String email, String phone, String fName, String lName, String DOB, String password, String address, String userType) {
@@ -99,15 +98,25 @@ public class Person {
 		return photoPath;
 	}
 
-    // --- NEW GETTERS FOR US15 ---
     public boolean isNotifyOnConfirmation() {
         return notifyOnConfirmation;
     }
+
     public boolean isNotifyOnCancellation() {
         return notifyOnCancellation;
     }
+
     public boolean isNotifyOnReminder() {
         return notifyOnReminder;
+    }
+
+    // --- NEW GETTERS FOR RATING SYSTEM ---
+    public double getAverageRating() {
+        return averageRating;
+    }
+
+    public int getRatingCount() {
+        return ratingCount;
     }
 
     // -----------------------------------------------------------------
@@ -144,10 +153,18 @@ public class Person {
 
 	public void setPhotoPath(String photoPath) { this.photoPath = photoPath; }
 
-    // --- NEW SETTERS FOR US15 ---
     public void setNotifyOnConfirmation(boolean notifyOnConfirmation) { this.notifyOnConfirmation = notifyOnConfirmation; }
 
     public void setNotifyOnCancellation(boolean notifyOnCancellation) { this.notifyOnCancellation = notifyOnCancellation; }
 
     public void setNotifyOnReminder(boolean notifyOnReminder) { this.notifyOnReminder = notifyOnReminder; }
+
+    // --- NEW SETTERS FOR RATING SYSTEM ---
+    public void setAverageRating(double averageRating) {
+        this.averageRating = averageRating;
+    }
+
+    public void setRatingCount(int ratingCount) {
+        this.ratingCount = ratingCount;
+    }
 }

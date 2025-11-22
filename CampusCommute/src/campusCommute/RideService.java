@@ -55,8 +55,10 @@ public class RideService {
             HttpResponse<String> resp =
                     http.send(req, HttpResponse.BodyHandlers.ofString());
 
-            return gson.fromJson(resp.body(), Ride.class);
-
+            if (resp.statusCode() == 200 || resp.statusCode() == 201) {
+                return gson.fromJson(resp.body(), Ride.class);
+            }
+            return null;
         } catch (Exception e) {
             e.printStackTrace();
             return null;
@@ -64,91 +66,26 @@ public class RideService {
     }
 
     // ---------------------------------------------------------
-    // SUBMIT RIDE REQUEST (passenger)
+    // SEND RIDE REQUEST (passenger)
     // ---------------------------------------------------------
-    public boolean sendRideRequest(long rideId, RideRequest reqBody) {
+    public boolean sendRideRequest(Long rideId, RideRequest requestBody) {
         try {
-            String json = gson.toJson(reqBody);
+            String json = gson.toJson(requestBody);
 
             HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(
-                            "http://localhost:8080/api/rides/" + rideId + "/request"
-                    ))
+                    .uri(URI.create("http://localhost:8080/api/rides/" + rideId + "/request"))
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .header("Content-Type", "application/json")
                     .build();
 
-            http.send(req, HttpResponse.BodyHandlers.ofString());
-            return true;
-
-        } catch (Exception e) {
-            return false;
-        }
-    }
-
-    // ---------------------------------------------------------
-    // GET ALL REQUESTS FOR A RIDE (driver panel)
-    // ---------------------------------------------------------
-    public RideRequest[] getRequests(long rideId) {
-        try {
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(
-                            "http://localhost:8080/api/rides/" + rideId + "/requests"
-                    ))
-                    .GET().build();
-
             HttpResponse<String> resp =
                     http.send(req, HttpResponse.BodyHandlers.ofString());
 
-            return gson.fromJson(resp.body(), RideRequest[].class);
+            return resp.statusCode() == 200;
 
         } catch (Exception e) {
-            return new RideRequest[0];
-        }
-    }
-
-    // ---------------------------------------------------------
-    // ACCEPT REQUEST (driver)
-    // ---------------------------------------------------------
-    public boolean acceptRequest(long rideId, long driverId, long passengerId, long reqId) {
-        try {
-            String url =
-                "http://localhost:8080/api/ride/" + rideId +
-                "/accept?driverId=" + driverId +
-                "&passengerId=" + passengerId +
-                "&requestId=" + reqId;
-
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(url))
-                    .POST(HttpRequest.BodyPublishers.noBody())
-                    .build();
-
-            http.send(req, HttpResponse.BodyHandlers.ofString());
-            return true;
-
-        } catch (Exception e) {
+            e.printStackTrace();
             return false;
-        }
-    }
-
-    // ---------------------------------------------------------
-    // DRIVER RIDES
-    // ---------------------------------------------------------
-    public Ride[] getDriverRides(long driverId) {
-        try {
-            HttpRequest req = HttpRequest.newBuilder()
-                    .uri(URI.create(
-                            "http://localhost:8080/api/rides/driver/" + driverId
-                    ))
-                    .GET().build();
-
-            HttpResponse<String> resp =
-                    http.send(req, HttpResponse.BodyHandlers.ofString());
-
-            return gson.fromJson(resp.body(), Ride[].class);
-
-        } catch (Exception e) {
-            return new Ride[0];
         }
     }
 
@@ -191,6 +128,36 @@ public class RideService {
 
         } catch (Exception e) {
             return new Ride[0];
+        }
+    }
+
+    // ---------------------------------------------------------
+    // RATE A DRIVER (NEW METHOD)
+    // ---------------------------------------------------------
+    public boolean rateDriver(Long driverId, double rating) {
+        Long passengerId = CurrentUser.getId();
+        
+        if (passengerId <= 0 || driverId == null || driverId <= 0) {
+            return false;
+        }
+
+        try {
+            RatingRequest reqBody = new RatingRequest(driverId, rating, passengerId);
+            String json = gson.toJson(reqBody);
+
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/rate/driver"))
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .header("Content-Type", "application/json")
+                    .build();
+
+            HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+
+            return resp.statusCode() == 200;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
         }
     }
 }

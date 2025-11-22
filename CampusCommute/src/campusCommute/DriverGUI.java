@@ -1,22 +1,21 @@
 package campusCommute;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
-import java.net.HttpURLConnection;
-import java.net.URL;
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.stream.Collectors;
-
 import com.google.gson.Gson;
 
 /**
  * DriverGUI
- * Fully Backend Synced.
- * --- NOW INCLUDES 'MY PROFILE' TAB AND 'POST RIDE' BUTTON ---
+ * - Displays driver's active rides and incoming requests.
+ * - Allows approving requests via the CORRECT backend endpoint.
  */
 public class DriverGUI extends JFrame {
 
@@ -35,293 +34,212 @@ public class DriverGUI extends JFrame {
     private List<RideRequest> currentRequests = new ArrayList<>();
 
     private final Gson gson = new Gson();
+    private final HttpClient httpClient = HttpClient.newHttpClient();
 
     public DriverGUI() {
-
         if (CurrentUser.loggedInUser == null) {
-            JOptionPane.showMessageDialog(this,
-                    "You must be logged in to view the Driver Panel.",
-                    "Login Required",
-                    JOptionPane.ERROR_MESSAGE);
-            dispose(); 
-            return;    
-        }
-
-        setTitle("Driver Panel");
-        setSize(800, 520);
-        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
-        setLocationRelativeTo(null);
-
-        JTabbedPane tabs = new JTabbedPane();
-        setContentPane(tabs);
-
-        // -------------------------------------------------------
-        // TAB 1: DRIVER RIDES + REQUESTS
-        // -------------------------------------------------------
-        JPanel ridePanel = new JPanel(new BorderLayout(10, 10));
-        tabs.addTab("My Rides", ridePanel);
-
-        rideListModel = new DefaultListModel<>();
-        rideListUI = new JList<>(rideListModel);
-        rideListUI.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        JScrollPane rideScroll = new JScrollPane(rideListUI);
-        rideScroll.setBorder(BorderFactory.createTitledBorder("Your Rides"));
-
-        ridePanel.add(rideScroll, BorderLayout.WEST);
-
-        requestListModel = new DefaultListModel<>();
-        requestListUI = new JList<>(requestListModel);
-        requestListUI.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-        requestListUI.setCellRenderer(new RequestRenderer());
-
-        JScrollPane requestScroll = new JScrollPane(requestListUI);
-        requestScroll.setBorder(BorderFactory.createTitledBorder("Passenger Requests"));
-
-        ridePanel.add(requestScroll, BorderLayout.CENTER);
-
-        // --- MODIFIED: Created a panel to hold both buttons ---
-        JPanel southButtonPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 5));
-        
-        JButton acceptButton = new JButton("Accept Request");
-        acceptButton.addActionListener(e -> acceptSelectedRequest());
-        southButtonPanel.add(acceptButton);
-
-        // --- NEW: Added the "Post a New Ride" button ---
-        JButton postRideButton = new JButton("Post a New Ride");
-        postRideButton.addActionListener(e -> openCampusCommuteGUI());
-        southButtonPanel.add(postRideButton);
-
-        // Add the new button panel to the bottom
-        ridePanel.add(southButtonPanel, BorderLayout.SOUTH);
-        // --- END OF MODIFICATION ---
-
-        rideListUI.addListSelectionListener(e -> {
-            if (!e.getValueIsAdjusting()) {
-                loadRequestsForSelectedRide();
-            }
-        });
-
-        // -------------------------------------------------------
-        // TAB 2: RIDE HISTORY
-        // -------------------------------------------------------
-        JPanel historyPanel = new JPanel(new BorderLayout());
-        tabs.addTab("Ride History", historyPanel);
-
-        String[] cols = {"Date", "From", "To", "Price"};
-        historyModel = new DefaultTableModel(cols, 0);
-        historyTable = new JTable(historyModel);
-        historyTable.setRowHeight(22);
-
-        JScrollPane historyScroll = new JScrollPane(historyTable);
-        historyPanel.add(historyScroll, BorderLayout.CENTER);
-
-        // -------------------------------------------------------
-        // TAB 3: MY PROFILE (opens new window)
-        // -------------------------------------------------------
-        JPanel profilePlaceholderPanel = new JPanel();
-        tabs.addTab("My Profile", profilePlaceholderPanel);
-        
-
-        // --- MODIFIED ChangeListener ---
-        tabs.addChangeListener(e -> {
-            int selectedIndex = tabs.getSelectedIndex();
-            
-            if (selectedIndex == 1) {
-                // User clicked "Ride History"
-                loadDriverHistory();
-            } else if (selectedIndex == 2) {
-                // User clicked "My Profile"
-                // Open the ViewProfileGUI as a new window
-                new ViewProfileGUI(CurrentUser.loggedInUser);
-                
-                // Set the tab back to "My Rides" so it doesn't
-                // look like they are "on" the empty profile tab.
-                tabs.setSelectedIndex(0); 
-            }
-        });
-
-        // Load data on startup
-        loadDriverRides();
-
-        setVisible(true);
-    }
-
-    // ========================================================
-    // LOAD DRIVER RIDES FROM BACKEND (FIXED)
-    // ========================================================
-    private void loadDriverRides() {
-        try {
-            long driverId = CurrentUser.loggedInUser.getID();
-            URL url = new URL("http://localhost:8080/api/rides/driver/" + driverId);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-
-            BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String json = reader.lines().collect(Collectors.joining());
-            reader.close();
-
-            Ride[] rides = gson.fromJson(json, Ride[].class);
-            
-            driverRides.clear();
-            rideListModel.clear();
-
-            for (Ride r : rides) {
-                driverRides.add(r);
-                rideListModel.addElement(r.toString());
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error loading rides.");
-            e.printStackTrace(); 
-        }
-    }
-
-    // ========================================================
-    // LOAD REQUESTS FOR SELECTED RIDE (FIXED)
-    // ========================================================
-    private void loadRequestsForSelectedRide() {
-        requestListModel.clear();
-        currentRequests.clear();
-
-        int index = rideListUI.getSelectedIndex();
-        if (index == -1) {
-            return; 
-        }
-
-        Ride selectedRide = driverRides.get(index);
-        List<RideRequest> requests = selectedRide.getRequests();
-
-        if (requests != null && !requests.isEmpty()) {
-            for (RideRequest req : requests) {
-                if ("PENDING".equalsIgnoreCase(req.getStatus())) {
-                    requestListModel.addElement(req);
-                    currentRequests.add(req);
-                }
-            }
-        }
-
-        if (requestListModel.isEmpty()) {
-            RideRequest placeholder = new RideRequest(0L, "No pending requests.");
-            requestListModel.addElement(placeholder);
-        }
-    }
-
-    // ========================================================
-    // ACCEPT REQUEST (FIXED)
-    // ========================================================
-    private void acceptSelectedRequest() {
-        int rideIndex = rideListUI.getSelectedIndex();
-        int requestIndex = requestListUI.getSelectedIndex();
-
-        if (rideIndex == -1 || requestIndex == -1) {
-            JOptionPane.showMessageDialog(this, "Please select a ride AND a request to accept.");
+            JOptionPane.showMessageDialog(this, "Please login first.");
+            dispose();
             return;
         }
 
-        Ride ride = driverRides.get(rideIndex);
-        RideRequest req = requestListUI.getSelectedValue();
+        setTitle("Driver Dashboard - " + CurrentUser.getName());
+        setSize(900, 600);
+        setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        setLocationRelativeTo(null);
 
-        if (req.getPassengerId() == 0L) return;
+        JTabbedPane tabbedPane = new JTabbedPane();
 
-        long driverId = CurrentUser.loggedInUser.getID();
-        long passengerId = req.getPassengerId();
-        long requestId = req.getId();
+        // Tab 1: Manage Rides & Requests
+        tabbedPane.addTab("Manage Rides", createManagePanel());
 
-        try {
-            String urlString = String.format("http://localhost:8080/api/ride/%d/accept?driverId=%d&passengerId=%d&requestId=%d",
-                    ride.getId(),
-                    driverId,
-                    passengerId,
-                    requestId);
+        // Tab 2: Ride History
+        tabbedPane.addTab("Ride History", createHistoryPanel());
 
-            URL url = new URL(urlString);
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("POST");
-            
-            int responseCode = conn.getResponseCode();
-            if (responseCode == 200) {
-                 JOptionPane.showMessageDialog(this, "Request accepted! Ride marked as COMPLETED!");
-                 loadDriverRides();
-                 requestListModel.clear();
-                 currentRequests.clear();
-            } else {
-                 JOptionPane.showMessageDialog(this, "Failed to accept request. Server responded with: " + responseCode);
-            }
-            conn.getInputStream().close();
+        // Tab 3: My Profile (Quick Link)
+        JPanel profileWrapper = new JPanel(new BorderLayout());
+        JButton openProfileBtn = new JButton("Open My Full Profile");
+        openProfileBtn.addActionListener(e -> new ViewProfileGUI(CurrentUser.loggedInUser).setVisible(true));
+        JPanel center = new JPanel(new GridBagLayout());
+        center.add(openProfileBtn);
+        profileWrapper.add(center);
+        tabbedPane.addTab("My Profile", profileWrapper);
 
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Failed to accept request: " + e.getMessage());
+        add(tabbedPane);
+        
+        // Initial Load
+        loadDriverData();
+    }
+
+    private JPanel createManagePanel() {
+        JPanel panel = new JPanel(new GridLayout(1, 2, 10, 10));
+        panel.setBorder(new EmptyBorder(10, 10, 10, 10));
+
+        // LEFT: My Active Rides
+        JPanel leftPanel = new JPanel(new BorderLayout(5, 5));
+        leftPanel.setBorder(BorderFactory.createTitledBorder("My Active Rides"));
+        
+        rideListModel = new DefaultListModel<>();
+        rideListUI = new JList<>(rideListModel);
+        leftPanel.add(new JScrollPane(rideListUI), BorderLayout.CENTER);
+        
+        JButton postRideBtn = new JButton("Post New Ride");
+        postRideBtn.addActionListener(e -> new CampusCommuteGUI().setVisible(true));
+        leftPanel.add(postRideBtn, BorderLayout.SOUTH);
+
+        // RIGHT: Incoming Requests
+        JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
+        rightPanel.setBorder(BorderFactory.createTitledBorder("Incoming Requests"));
+        
+        requestListModel = new DefaultListModel<>();
+        requestListUI = new JList<>(requestListModel);
+        // Custom renderer to show passenger names nicely
+        requestListUI.setCellRenderer(new RequestRenderer());
+        
+        rightPanel.add(new JScrollPane(requestListUI), BorderLayout.CENTER);
+
+        JPanel btnPanel = new JPanel(new GridLayout(1, 2, 5, 0));
+        JButton approveBtn = new JButton("Approve Request");
+        JButton refreshBtn = new JButton("Refresh Data");
+        
+        approveBtn.setBackground(new Color(144, 238, 144)); // Light green
+        approveBtn.setOpaque(true);
+        approveBtn.setBorderPainted(false);
+
+        approveBtn.addActionListener(e -> approveSelectedRequest());
+        refreshBtn.addActionListener(e -> loadDriverData());
+
+        btnPanel.add(approveBtn);
+        btnPanel.add(refreshBtn);
+        rightPanel.add(btnPanel, BorderLayout.SOUTH);
+
+        panel.add(leftPanel);
+        panel.add(rightPanel);
+        return panel;
+    }
+
+    private JPanel createHistoryPanel() {
+        JPanel panel = new JPanel(new BorderLayout());
+        String[] cols = {"Date", "Start", "Destination", "Price", "Rating"};
+        historyModel = new DefaultTableModel(cols, 0);
+        historyTable = new JTable(historyModel);
+        panel.add(new JScrollPane(historyTable), BorderLayout.CENTER);
+        
+        JButton refreshHist = new JButton("Refresh History");
+        refreshHist.addActionListener(e -> loadHistory());
+        panel.add(refreshHist, BorderLayout.SOUTH);
+        return panel;
+    }
+
+    // =================================================================
+    // DATA LOADING
+    // =================================================================
+
+    private void loadDriverData() {
+        loadMyRides();
+        // We reload requests implicitly by checking rides, 
+        // but let's clear the list first to avoid duplicates
+        requestListModel.clear();
+        currentRequests.clear();
+        
+        // Re-fetch rides to get embedded requests
+        for (Ride ride : driverRides) {
+             // Only show requests for PENDING or APPROVED rides (not completed)
+             if (!"COMPLETED".equals(ride.getStatus()) && ride.getRequests() != null) {
+                 for (RideRequest req : ride.getRequests()) {
+                     if ("PENDING".equals(req.getStatus())) {
+                         currentRequests.add(req);
+                         requestListModel.addElement(req);
+                     }
+                 }
+             }
         }
     }
 
-    // ========================================================
-    // LOAD DRIVER RIDE HISTORY
-    // ========================================================
-    private void loadDriverHistory() {
+    private void loadMyRides() {
         try {
-            long id = CurrentUser.loggedInUser.getID();
-            URL url = new URL("http://localhost:8080/api/history/driver/" + id);
-
-            HttpURLConnection conn = (HttpURLConnection) url.openConnection();
-            conn.setRequestMethod("GET");
-
-            BufferedReader reader =
-                    new BufferedReader(new InputStreamReader(conn.getInputStream()));
-            String json = reader.lines().collect(Collectors.joining());
-            reader.close();
-
-            Ride[] history = gson.fromJson(json, Ride[].class);
-
-            historyModel.setRowCount(0);
-            if (history == null || history.length == 0) {
-                historyModel.addRow(new Object[]{"No completed rides", "", "", ""});
-                return;
-            }
-
-            for (Ride r : history) {
-                historyModel.addRow(new Object[]{
-                        r.getDate(),
-                        r.getStartLocation(),
-                        r.getDestination(),
-                        "$" + r.getPrice()
-                });
-            }
-
-        } catch (Exception e) {
-            JOptionPane.showMessageDialog(this, "Error loading history.");
-        }
-    }
-    
-    // --- NEW HELPER METHOD ---
-    /**
-     * Opens the CampusCommuteGUI (ride posting) window.
-     * This is safe because both GUIs have login checks.
-     */
-    private void openCampusCommuteGUI() {
-        new CampusCommuteGUI();
-    }
-    // --- END OF NEW METHOD ---
-
-    /**
-     * Custom ListCellRenderer to display RideRequest objects in a JList.
-     */
-    class RequestRenderer extends DefaultListCellRenderer {
-        @Override
-        public Component getListCellRendererComponent(JList<?> list, Object value, int index,
-                                                      boolean isSelected, boolean cellHasFocus) {
+            Long driverId = CurrentUser.getId();
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/rides/driver/" + driverId))
+                    .GET().build();
             
-            Component c = super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
-
-            if (value instanceof RideRequest) {
-                RideRequest req = (RideRequest) value;
-                if (req.getPassengerId() == 0L) {
-                    setText(req.getPassengerName());
-                } else {
-                    setText(String.format("Passenger: %s (ID: %d)", req.getPassengerName(), req.getPassengerId()));
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            if (resp.statusCode() == 200) {
+                Ride[] rides = gson.fromJson(resp.body(), Ride[].class);
+                driverRides.clear();
+                rideListModel.clear();
+                
+                if (rides != null) {
+                    for (Ride r : rides) {
+                        driverRides.add(r);
+                        rideListModel.addElement(r.toString());
+                    }
                 }
             }
-            return c;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void loadHistory() {
+        // (Same as before, fetches completed rides)
+        Ride[] history = RideService.getInstance().getDriverHistory(CurrentUser.getId());
+        historyModel.setRowCount(0);
+        if (history != null) {
+            for (Ride r : history) {
+                String ratingStr = (r.getDriverRating() > 0) ? String.format("%.1f", r.getDriverRating()) : "-";
+                historyModel.addRow(new Object[]{r.getDate(), r.getStartLocation(), r.getDestination(), "$" + r.getPrice(), ratingStr});
+            }
+        }
+    }
+
+    // =================================================================
+    // APPROVE LOGIC (THE FIX)
+    // =================================================================
+
+    private void approveSelectedRequest() {
+        RideRequest selected = requestListUI.getSelectedValue();
+        if (selected == null) {
+            JOptionPane.showMessageDialog(this, "Please select a request to approve.");
+            return;
+        }
+
+        // FIX: Use the Request ID, not Ride/Driver IDs
+        Long reqId = selected.getId();
+
+        try {
+            // Correct URL: /api/requests/{id}/status
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/requests/" + reqId + "/status"))
+                    .POST(HttpRequest.BodyPublishers.ofString("APPROVED"))
+                    .header("Content-Type", "text/plain") 
+                    .build();
+
+            HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                JOptionPane.showMessageDialog(this, "Request Approved!");
+                // Remove from list locally so we don't have to refresh everything
+                requestListModel.removeElement(selected);
+            } else {
+                JOptionPane.showMessageDialog(this, "Failed. Server said: " + response.statusCode());
+            }
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
+        }
+    }
+
+    // Custom renderer to make the request list look nice
+    class RequestRenderer extends DefaultListCellRenderer {
+        @Override
+        public Component getListCellRendererComponent(JList<?> list, Object value, int index, boolean isSelected, boolean cellHasFocus) {
+            super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
+            if (value instanceof RideRequest) {
+                RideRequest req = (RideRequest) value;
+                setText("Passenger: " + req.getPassengerName() + " (ID: " + req.getPassengerId() + ")");
+            }
+            return this;
         }
     }
 }
