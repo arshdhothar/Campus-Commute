@@ -104,16 +104,25 @@ public class PassengerGUI extends JFrame {
         }
 
         searchPanel.add(bottomBar, BorderLayout.SOUTH);
-        performSearch();
     }
 
     private void performSearch() {
         String query = searchField.getText().trim();
+        if (query.isEmpty()) {
+            searchListModel.clear();
+            currentSearchRides.clear();
+            return;
+        }
+
         List<Ride> results = passenger.searchRides(query);
         currentSearchRides = results;
         searchListModel.clear();
         for (Ride r : results) {
             searchListModel.addElement(r.toString());
+        }
+        
+        if (results.isEmpty()) {
+            searchListModel.addElement("No rides found matching '" + query + "'");
         }
     }
 
