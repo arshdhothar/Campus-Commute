@@ -16,6 +16,7 @@ import com.google.gson.Gson;
  * DriverGUI
  * - Displays driver's active rides and incoming requests.
  * - Allows approving requests via the CORRECT backend endpoint.
+ * - Includes Chat functionality.
  */
 public class DriverGUI extends JFrame {
 
@@ -83,9 +84,29 @@ public class DriverGUI extends JFrame {
         rideListUI = new JList<>(rideListModel);
         leftPanel.add(new JScrollPane(rideListUI), BorderLayout.CENTER);
         
+        // --- MODIFIED: Button Panel for Post Ride + Chat ---
+        JPanel leftBtnPanel = new JPanel(new GridLayout(1, 2, 5, 0));
+
         JButton postRideBtn = new JButton("Post New Ride");
         postRideBtn.addActionListener(e -> new CampusCommuteGUI().setVisible(true));
-        leftPanel.add(postRideBtn, BorderLayout.SOUTH);
+        
+        // NEW CHAT BUTTON
+        JButton chatBtn = new JButton("Ride Chat");
+        chatBtn.addActionListener(e -> {
+            int index = rideListUI.getSelectedIndex();
+            if (index != -1) {
+                Ride r = driverRides.get(index);
+                new ChatGUI(r.getId()); // Opens the chat window for the selected ride
+            } else {
+                JOptionPane.showMessageDialog(this, "Select a ride to open chat.");
+            }
+        });
+
+        leftBtnPanel.add(postRideBtn);
+        leftBtnPanel.add(chatBtn);
+        
+        leftPanel.add(leftBtnPanel, BorderLayout.SOUTH);
+        // ---------------------------------------------------
 
         // RIGHT: Incoming Requests
         JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
@@ -183,6 +204,7 @@ public class DriverGUI extends JFrame {
 
     private void loadHistory() {
         // (Same as before, fetches completed rides)
+        // NOTE: Ensure RideService is available or replace with direct HTTP if needed
         Ride[] history = RideService.getInstance().getDriverHistory(CurrentUser.getId());
         historyModel.setRowCount(0);
         if (history != null) {
