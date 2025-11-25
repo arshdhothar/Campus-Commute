@@ -107,7 +107,7 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 - Provides methods to return formatted ride details (e.g., via toString() for display in the GUI).
 - Validates ride information to ensure numeric and logical correctness (e.g., seat and price validation).
 - Maintain list of RideRequest objects.
-
+- Store driver rating data for display in search results.
 
 **Collaborators:**
 - RideRequest
@@ -177,11 +177,13 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 - Provide Passenger Portal UI for searching rides
 - Display ride matches by location/time/destination
 - Allow passengers to send ride requests
+- Allow passengers to rate drivers upon completion via the History tab.
 
 **Collaborators:**
 - Ride
 - RideRequest
 - Passenger
+- RideService
 
 
 ---
@@ -346,6 +348,7 @@ Backend:
 - Update ride statuses.
 - Notify users through NotificationCenter for ride events.
 - Save and load ride data using RideDataManager
+- Handle driver rating submissions.
 
 **Collaborators:**
 - Driver: publishes rides.
@@ -353,6 +356,7 @@ Backend:
 - Ride:stores ride details.
 - NotificationCenter: sends alerts.
 - RideDataManager
+- RatingController
 ---
 ### **Class Name:** RideDataManager
 **Parent Class:** None  
@@ -485,11 +489,13 @@ All data is stored locally in text files, so the system does not depend on an ex
 **Responsibilities:**
 - Store user profile information (name, email, password, userType).
 - Store optional fields (bio, emergency contact, photo path).
+- Store rating metrics (average rating, total rating count).
 
 **Collaborators:**
 - CurrentUser
 - LoginFrame
 - ProfileCustomizationGUI
+- RatingController
 
  ---
 
@@ -501,6 +507,7 @@ All data is stored locally in text files, so the system does not depend on an ex
 - Display the current user's profile information (name, email, phone, user type, bio) in a read-only format
 - Provide a button to navigate to "Edit Profile" screen that sends you to ProfileCustomizationGUI
 - Provide a button to either "Offer a Ride" or "Find a Ride" that sends you to the respective GUI.
+- Display the driver's calculated average rating and total review count.
 
 **Collaborators:**
 - CurrentUser
@@ -542,7 +549,37 @@ All data is stored locally in text files, so the system does not depend on an ex
 
 ---
 
- 
+## **Class Name:** RatingController
+**Parent Class:** None  
+**Subclasses:** None  
+
+### **Responsibilities**
+- Receive rating submissions from the frontend via REST API.
+- Validate rating values (ensure 1-5 stars and no duplicates).
+- Persist individual Rating records to the database.
+- Recalculate and update the Person (Driver) average rating and count. 
+
+### **Collaborators**
+- Rating
+- RatingRepository
+- PersonRepository
+
+---
+
+## **Class Name:** Rating
+**Parent Class:** None  
+**Subclasses:** None  
+
+### **Responsibilities**
+- Represent a single rating event.
+- Store the score (1-5), the rater's ID, and the rated driver's ID.
+- Store optional comments/reviews. 
+
+### **Collaborators**
+- RatingController
+- RatingRepository
+
+---
 
 ## 5. System Architecture Diagram
 
