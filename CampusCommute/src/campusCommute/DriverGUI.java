@@ -14,8 +14,10 @@ import com.google.gson.Gson;
 
 /**
  * DriverGUI
- * - Displays driver's active rides and incoming requests.
- * - Allows approving requests via the CORRECT backend endpoint.
+ * - Displays driver's active rides.
+ * - Shows incoming requests ONLY for the selected ride.
+ * - Allows approving requests & Chat.
+ * - Updates History immediately upon approval.
  */
 public class DriverGUI extends JFrame {
 
@@ -31,7 +33,6 @@ public class DriverGUI extends JFrame {
 
     // Backend data
     private List<Ride> driverRides = new ArrayList<>();
-    private List<RideRequest> currentRequests = new ArrayList<>();
 
     private final Gson gson = new Gson();
     private final HttpClient httpClient = HttpClient.newHttpClient();
@@ -69,6 +70,7 @@ public class DriverGUI extends JFrame {
         
         // Initial Load
         loadDriverData();
+        loadHistory(); // Load history on startup too
     }
 
     private JPanel createManagePanel() {
@@ -83,17 +85,34 @@ public class DriverGUI extends JFrame {
         rideListUI = new JList<>(rideListModel);
         leftPanel.add(new JScrollPane(rideListUI), BorderLayout.CENTER);
         
+        // Button Panel for Post Ride + Chat
+        JPanel leftBtnPanel = new JPanel(new GridLayout(1, 2, 5, 0));
+
         JButton postRideBtn = new JButton("Post New Ride");
         postRideBtn.addActionListener(e -> new CampusCommuteGUI().setVisible(true));
-        leftPanel.add(postRideBtn, BorderLayout.SOUTH);
+        
+        JButton chatBtn = new JButton("Ride Chat");
+        chatBtn.addActionListener(e -> {
+            int index = rideListUI.getSelectedIndex();
+            if (index != -1) {
+                Ride r = driverRides.get(index);
+                new ChatGUI(r.getId()); 
+            } else {
+                JOptionPane.showMessageDialog(this, "Select a ride to open chat.");
+            }
+        });
+
+        leftBtnPanel.add(postRideBtn);
+        leftBtnPanel.add(chatBtn);
+        
+        leftPanel.add(leftBtnPanel, BorderLayout.SOUTH);
 
         // RIGHT: Incoming Requests
         JPanel rightPanel = new JPanel(new BorderLayout(5, 5));
-        rightPanel.setBorder(BorderFactory.createTitledBorder("Incoming Requests"));
+        rightPanel.setBorder(BorderFactory.createTitledBorder("Incoming Requests (Select a Ride)"));
         
         requestListModel = new DefaultListModel<>();
         requestListUI = new JList<>(requestListModel);
-        // Custom renderer to show passenger names nicely
         requestListUI.setCellRenderer(new RequestRenderer());
         
         rightPanel.add(new JScrollPane(requestListUI), BorderLayout.CENTER);
@@ -102,12 +121,15 @@ public class DriverGUI extends JFrame {
         JButton approveBtn = new JButton("Approve Request");
         JButton refreshBtn = new JButton("Refresh Data");
         
-        approveBtn.setBackground(new Color(144, 238, 144)); // Light green
+        approveBtn.setBackground(new Color(144, 238, 144)); 
         approveBtn.setOpaque(true);
         approveBtn.setBorderPainted(false);
 
         approveBtn.addActionListener(e -> approveSelectedRequest());
-        refreshBtn.addActionListener(e -> loadDriverData());
+        refreshBtn.addActionListener(e -> {
+            loadDriverData();
+            loadHistory(); 
+        });
 
         btnPanel.add(approveBtn);
         btnPanel.add(refreshBtn);
@@ -115,6 +137,14 @@ public class DriverGUI extends JFrame {
 
         panel.add(leftPanel);
         panel.add(rightPanel);
+        
+        // --- LISTENER: Load requests when a ride is selected ---
+        rideListUI.addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                loadRequestsForSelectedRide();
+            }
+        });
+
         return panel;
     }
 
@@ -137,23 +167,7 @@ public class DriverGUI extends JFrame {
 
     private void loadDriverData() {
         loadMyRides();
-        // We reload requests implicitly by checking rides, 
-        // but let's clear the list first to avoid duplicates
         requestListModel.clear();
-        currentRequests.clear();
-        
-        // Re-fetch rides to get embedded requests
-        for (Ride ride : driverRides) {
-             // Only show requests for PENDING or APPROVED rides (not completed)
-             if (!"COMPLETED".equals(ride.getStatus()) && ride.getRequests() != null) {
-                 for (RideRequest req : ride.getRequests()) {
-                     if ("PENDING".equals(req.getStatus())) {
-                         currentRequests.add(req);
-                         requestListModel.addElement(req);
-                     }
-                 }
-             }
-        }
     }
 
     private void loadMyRides() {
@@ -171,8 +185,18 @@ public class DriverGUI extends JFrame {
                 
                 if (rides != null) {
                     for (Ride r : rides) {
-                        driverRides.add(r);
-                        rideListModel.addElement(r.toString());
+                        // Filter out COMPLETED rides from the active list
+                        if (!"COMPLETED".equalsIgnoreCase(r.getStatus())) {
+                            String rideStr = String.format("%s -> %s @ %s | Seats: %d | $%.2f",
+                                    r.getStartLocation(),
+                                    r.getDestination(),
+                                    r.getDepartureTime(),
+                                    r.getAvailableSeats(),
+                                    r.getPrice());
+                            
+                            driverRides.add(r);
+                            rideListModel.addElement(rideStr);
+                        }
                     }
                 }
             }
@@ -180,37 +204,96 @@ public class DriverGUI extends JFrame {
             e.printStackTrace();
         }
     }
+    
+    private void loadRequestsForSelectedRide() {
+        requestListModel.clear();
+        
+        int index = rideListUI.getSelectedIndex();
+        if (index == -1) {
+            return; 
+        }
+        
+        Ride selectedRide = driverRides.get(index);
+        List<RideRequest> requests = selectedRide.getRequests();
+        
+        if (requests != null) {
+            for (RideRequest req : requests) {
+                if ("PENDING".equalsIgnoreCase(req.getStatus())) {
+                    requestListModel.addElement(req);
+                }
+            }
+        }
+        
+        if (requestListModel.isEmpty()) {
+             RideRequest placeholder = new RideRequest(0L, "No pending requests");
+             requestListModel.addElement(placeholder);
+        }
+    }
 
     private void loadHistory() {
-        // (Same as before, fetches completed rides)
-        Ride[] history = RideService.getInstance().getDriverHistory(CurrentUser.getId());
-        historyModel.setRowCount(0);
-        if (history != null) {
-            for (Ride r : history) {
-                String ratingStr = (r.getDriverRating() > 0) ? String.format("%.1f", r.getDriverRating()) : "-";
-                historyModel.addRow(new Object[]{r.getDate(), r.getStartLocation(), r.getDestination(), "$" + r.getPrice(), ratingStr});
+        try {
+            Long driverId = CurrentUser.getId();
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/history/driver/" + driverId))
+                    .GET().build();
+
+            HttpResponse<String> resp = httpClient.send(req, HttpResponse.BodyHandlers.ofString());
+            
+            if (resp.statusCode() == 200) {
+                Ride[] history = gson.fromJson(resp.body(), Ride[].class);
+                historyModel.setRowCount(0); 
+                
+                if (history != null) {
+                    for (Ride r : history) {
+                        String ratingStr = (r.getDriverRating() > 0) ? String.format("%.1f", r.getDriverRating()) : "-";
+                        historyModel.addRow(new Object[]{
+                            r.getDate(), 
+                            r.getStartLocation(), 
+                            r.getDestination(), 
+                            "$" + r.getPrice(), 
+                            ratingStr
+                        });
+                    }
+                }
             }
+        } catch (Exception e) {
+            e.printStackTrace();
+            JOptionPane.showMessageDialog(this, "Error loading history.");
         }
     }
 
     // =================================================================
-    // APPROVE LOGIC (THE FIX)
+    // APPROVE LOGIC (FIXED TO MATCH NEW BACKEND ENDPOINT)
     // =================================================================
 
     private void approveSelectedRequest() {
+        // 1. Check if a ride is selected
+        int rideIndex = rideListUI.getSelectedIndex();
+        if (rideIndex == -1) {
+            JOptionPane.showMessageDialog(this, "Please select a ride first.");
+            return;
+        }
+
+        // 2. Check if a request is selected
         RideRequest selected = requestListUI.getSelectedValue();
         if (selected == null) {
             JOptionPane.showMessageDialog(this, "Please select a request to approve.");
             return;
         }
+        
+        if (selected.getPassengerId() == 0L) return; // Ignore placeholder
 
-        // FIX: Use the Request ID, not Ride/Driver IDs
+        // 3. Gather Data
         Long reqId = selected.getId();
 
         try {
-            // Correct URL: /api/requests/{id}/status
+            // --- FIX: Use the new simple URL structure from RideController ---
+            // Endpoint: /api/requests/{reqId}/status
+            String urlStr = String.format("http://localhost:8080/api/requests/%d/status", reqId);
+
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(URI.create("http://localhost:8080/api/requests/" + reqId + "/status"))
+                    .uri(URI.create(urlStr))
+                    // Send "APPROVED" as raw text in the body
                     .POST(HttpRequest.BodyPublishers.ofString("APPROVED"))
                     .header("Content-Type", "text/plain") 
                     .build();
@@ -218,9 +301,15 @@ public class DriverGUI extends JFrame {
             HttpResponse<String> response = httpClient.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
-                JOptionPane.showMessageDialog(this, "Request Approved!");
-                // Remove from list locally so we don't have to refresh everything
+                JOptionPane.showMessageDialog(this, "Request Approved! Seat count updated.");
+                
+                // Remove from list locally
                 requestListModel.removeElement(selected);
+                
+                // Refresh data (updates seats, history, etc.)
+                loadMyRides();
+                loadHistory(); 
+                
             } else {
                 JOptionPane.showMessageDialog(this, "Failed. Server said: " + response.statusCode());
             }
@@ -237,7 +326,11 @@ public class DriverGUI extends JFrame {
             super.getListCellRendererComponent(list, value, index, isSelected, cellHasFocus);
             if (value instanceof RideRequest) {
                 RideRequest req = (RideRequest) value;
-                setText("Passenger: " + req.getPassengerName() + " (ID: " + req.getPassengerId() + ")");
+                if (req.getPassengerId() == 0L) {
+                    setText(req.getPassengerName()); 
+                } else {
+                    setText("Passenger: " + req.getPassengerName() + " (ID: " + req.getPassengerId() + ")");
+                }
             }
             return this;
         }

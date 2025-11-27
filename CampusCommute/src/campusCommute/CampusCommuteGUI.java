@@ -138,7 +138,7 @@ public class CampusCommuteGUI extends JFrame {
         scrollPane.setBorder(BorderFactory.createTitledBorder("Posted Rides"));
         panel.add(scrollPane, BorderLayout.CENTER);
 
-     // --- Emergency bottom bar (always visible) ---
+        // --- Emergency bottom bar (always visible) ---
         JPanel bottomBar = new JPanel(new BorderLayout(10, 0));
         emergencyPanel = new EmergencyButtonPanel(
                 "Driver",
@@ -268,7 +268,15 @@ public class CampusCommuteGUI extends JFrame {
      * Open backend-synced Driver Panel
      */
     private void openDriverPanel() {
-        SwingUtilities.invokeLater(() -> new DriverGUI());
+        // Use invokeLater to ensure thread safety and wrap in try-catch to debug failures
+        SwingUtilities.invokeLater(() -> {
+            try {
+                new DriverGUI().setVisible(true);
+            } catch (Exception ex) {
+                ex.printStackTrace(); // Print the real error to the console
+                JOptionPane.showMessageDialog(this, "Failed to open Driver Panel: " + ex.getMessage());
+            }
+        });
     }
 
     /**
