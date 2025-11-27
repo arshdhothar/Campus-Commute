@@ -40,7 +40,7 @@ Tracking on Trello Total Mark: 15 / 15
 
 ---
 
-** Can't find your Trello. send me an email with your project name(project-aszia) and your trello board name. can't find your vide **
+** Great Job!**
 
 ## Total Mark
 
