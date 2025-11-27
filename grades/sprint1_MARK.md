@@ -19,24 +19,24 @@
 ## User Stories (Tracked in Trello) (max 12 marks) 
 
 
-  User Stories Total Mark: 0 / 12
+  User Stories Total Mark: 12 / 12
 
 ---
 ## Tracking on Trello  (max 4 marks) 
 
 
-Tracking on Trello Total Mark: 0 / 15
+Tracking on Trello Total Mark: 15 / 15
 
 ---
 ## Sprint Completion (Max 10 marks) 
  
-    Your Mark: 0 /10
+    Your Mark: 10 /10
 
 ---
 ## Sprint Video Demo (Max 12 marks) 
  
 
-  Your Mark: 0 / 12
+  Your Mark: 12 / 12
 
 ---
 
@@ -44,5 +44,5 @@ Tracking on Trello Total Mark: 0 / 15
 
 ## Total Mark
 
-15 / 64
+64 / 64
 
