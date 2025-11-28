@@ -34,6 +34,9 @@ public class PassengerGUI extends JFrame {
 
     private List<Ride> allRides = new ArrayList<>();
     private List<Ride> filtered = new ArrayList<>();
+    
+    private List<Ride> historyRides = new ArrayList<>();
+
 
     // HISTORY COMPONENTS
     private DefaultTableModel historyModel;
@@ -98,26 +101,29 @@ public class PassengerGUI extends JFrame {
         historyLabel.setFont(new Font("Segoe UI", Font.BOLD, 22));
         histPanel.add(historyLabel, BorderLayout.NORTH);
 
-        String[] cols = {"Date", "From", "To", "Price", "DriverID", "Action"};
+        String[] cols = {"Date", "From", "To", "Total Fare", "My Share", "Payment", "DriverID", "Action"};
         historyModel = new DefaultTableModel(cols, 0) {
             @Override
             public boolean isCellEditable(int row, int column) {
-                return column == 5; // Only button column is editable
+                // Only Action button column
+                return column == 7;
             }
         };
+
 
         historyTable = new JTable(historyModel);
         historyTable.setFont(new Font("Segoe UI", Font.PLAIN, 14));
         historyTable.setRowHeight(24);
-        
-        // Hide DriverID column
-        historyTable.getColumnModel().getColumn(4).setMinWidth(0);
-        historyTable.getColumnModel().getColumn(4).setMaxWidth(0);
-        historyTable.getColumnModel().getColumn(4).setWidth(0);
 
-        // Set up button renderer/editor
-        historyTable.getColumnModel().getColumn(5).setCellRenderer(new ButtonRenderer());
-        historyTable.getColumnModel().getColumn(5).setCellEditor(new ButtonEditor(new JCheckBox()));
+        // hide DriverID column (now index 6)
+        historyTable.getColumnModel().getColumn(6).setMinWidth(0);
+        historyTable.getColumnModel().getColumn(6).setMaxWidth(0);
+        historyTable.getColumnModel().getColumn(6).setWidth(0);
+
+        // button renderer/editor (Action column now index 7)
+        historyTable.getColumnModel().getColumn(7).setCellRenderer(new ButtonRenderer());
+        historyTable.getColumnModel().getColumn(7).setCellEditor(new ButtonEditor(new JCheckBox()));
+
 
         histPanel.add(new JScrollPane(historyTable), BorderLayout.CENTER);
         
@@ -330,20 +336,28 @@ public class PassengerGUI extends JFrame {
             Ride[] rides = gson.fromJson(json, Ride[].class);
 
             historyModel.setRowCount(0);
+            historyRides.clear();
 
             if (rides == null || rides.length == 0) {
-                historyModel.addRow(new Object[]{"No rides", "", "", ""});
+                historyModel.addRow(new Object[]{"No rides", "", "", "", "", "", "", ""});
                 return;
             }
 
             for (Ride r : rides) {
-                String driverIdStr = (r.getDriverId() != null) ? String.valueOf(r.getDriverId()) : "0";
-                String actionText = r.getStatus();
+                historyRides.add(r);
 
-                boolean isRateable = "APPROVED".equalsIgnoreCase(r.getStatus()) || 
+                String driverIdStr = (r.getDriverId() != null) ? String.valueOf(r.getDriverId()) : "0";
+
+                Double splitFare = r.getSplitFare();
+                String payment = (r.getPaymentStatus() != null) ? r.getPaymentStatus() : "PENDING";
+
+                boolean isRateable = "APPROVED".equalsIgnoreCase(r.getStatus()) ||
                                      "COMPLETED".equalsIgnoreCase(r.getStatus());
 
-                if (isRateable && r.getDriverId() != null) {
+                String actionText = "";
+                if (!"PAID".equalsIgnoreCase(payment)) {
+                    actionText = "Mark Paid";
+                } else if (isRateable && r.getDriverId() != null) {
                     actionText = "Rate Driver";
                 }
 
@@ -351,11 +365,14 @@ public class PassengerGUI extends JFrame {
                         r.getDate(),
                         r.getStartLocation(),
                         r.getDestination(),
-                        "$" + r.getPrice(),
-                        driverIdStr,
-                        actionText
+                        "$" + r.getPrice(),                    // Total Fare
+                        (splitFare != null ? "$" + splitFare : ""), // My Share
+                        payment,                               // Payment status
+                        driverIdStr,                           // hidden
+                        actionText                             // Action button
                 });
             }
+
 
         } catch (Exception ex) {
             JOptionPane.showMessageDialog(this, "Error loading history.");
@@ -368,7 +385,12 @@ public class PassengerGUI extends JFrame {
         @Override
         public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
             if (value == null) { setText(""); setEnabled(false); }
-            else { setText(value.toString()); setEnabled("Rate Driver".equals(value.toString())); }
+            else {
+                String text = value.toString();
+                setText(text);
+                setEnabled("Rate Driver".equals(text) || "Mark Paid".equals(text));
+            }
+
             return this;
         }
     }
@@ -397,14 +419,43 @@ public class PassengerGUI extends JFrame {
 
         @Override
         public Object getCellEditorValue() {
-            if (isPushed && "Rate Driver".equals(label)) {
-                String driverIdStr = (String) historyTable.getValueAt(currentRow, 4);
-                Long driverId = Long.parseLong(driverIdStr);
-                SwingUtilities.invokeLater(() -> showRatingDialog(driverId));
+            if (isPushed) {
+
+                // --- CASE 1: RATE DRIVER ---
+                if ("Rate Driver".equals(label)) {
+                    // DriverID column moved after adding new payment columns
+                    int modelRow = historyTable.convertRowIndexToModel(currentRow);
+                    String driverIdStr = (String) historyTable.getValueAt(modelRow, 6);
+                    Long driverId = Long.parseLong(driverIdStr);
+
+                    SwingUtilities.invokeLater(() -> showRatingDialog(driverId));
+                }
+
+                // --- CASE 2: MARK PAYMENT AS PAID ---
+                else if ("Mark Paid".equals(label)) {
+                    int modelRow = historyTable.convertRowIndexToModel(currentRow);
+                    
+                    // Get the ride object from your history list
+                    Ride ride = historyRides.get(modelRow);
+
+                    long rideId = ride.getId();
+                    long passengerId = CurrentUser.loggedInUser.getID();
+
+                    boolean ok = RideService.getInstance().markPaymentAsPaid(rideId, passengerId);
+
+                    if (ok) {
+                        JOptionPane.showMessageDialog(button, "Payment marked as PAID.");
+                        loadRideHistory(); // refresh UI
+                    } else {
+                        JOptionPane.showMessageDialog(button, "Failed to update payment status.");
+                    }
+                }
             }
+
             isPushed = false;
             return label;
         }
+
 
         @Override
         public boolean stopCellEditing() { isPushed = false; return super.stopCellEditing(); }

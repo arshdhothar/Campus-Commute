@@ -160,4 +160,27 @@ public class RideService {
             return false;
         }
     }
+    
+    // ---------------------------------------------------------
+    // MARK PAYMENT AS PAID (frontend call, backend later)
+    // ---------------------------------------------------------
+    public boolean markPaymentAsPaid(long rideId, long passengerId) {
+        try {
+            String json = String.format("{\"rideId\":%d,\"passengerId\":%d}", rideId, passengerId);
+
+            HttpRequest req = HttpRequest.newBuilder()
+                    .uri(URI.create("http://localhost:8080/api/payments/markPaid"))
+                    .header("Content-Type", "application/json")
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> resp = http.send(req, HttpResponse.BodyHandlers.ofString());
+            return resp.statusCode() == 200;
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            return false;
+        }
+    }
+
 }

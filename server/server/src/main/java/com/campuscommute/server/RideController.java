@@ -116,19 +116,21 @@ public class RideController {
     // ---------------------------------------------------------
     // 6. PASSENGER HISTORY (UPDATED)
     // ---------------------------------------------------------
-    @GetMapping("/history/passenger/{id}")
+        @GetMapping("/history/passenger/{id}")
     public List<Ride> getPassengerHistory(@PathVariable Long id) {
         // Look up the requests the passenger has made
         List<RideRequest> requests = rideRequestRepository.findByPassengerId(id);
         List<Ride> history = new ArrayList<>();
 
         for (RideRequest req : requests) {
-            // If the request is APPROVED, add it to history so they can rate
-            if ("APPROVED".equalsIgnoreCase(req.getStatus()) || "COMPLETED".equalsIgnoreCase(req.getStatus())) {
+            // Only show APPROVED or COMPLETED rides
+            if ("APPROVED".equalsIgnoreCase(req.getStatus()) ||
+                "COMPLETED".equalsIgnoreCase(req.getStatus())) {
+
                 Ride ride = req.getRide();
-                
-                // Set status to match request so frontend enables button
-                ride.setStatus(req.getStatus()); 
+
+                // Status on ride matches request status
+                ride.setStatus(req.getStatus());
 
                 // Add driver rating info
                 if (ride.getDriverId() != null) {
@@ -136,14 +138,62 @@ public class RideController {
                         ride.setDriverRating(driver.getAverageRating());
                     });
                 }
+
+                // --- NEW: compute split fare (only approved/completed passengers) ---
+                int passengerCount = 0;
+                if (ride.getRequests() != null) {
+                    for (RideRequest otherReq : ride.getRequests()) {
+                        if ("APPROVED".equalsIgnoreCase(otherReq.getStatus()) ||
+                            "COMPLETED".equalsIgnoreCase(otherReq.getStatus())) {
+                            passengerCount++;
+                        }
+                    }
+                }
+
+                if (passengerCount > 0) {
+                    double split = ride.getPrice() / passengerCount;
+                    ride.setSplitFare(split);
+                }
+
+                // --- NEW: set payment status for THIS passenger ---
+                String paymentStatus = req.getPaymentStatus();
+                if (paymentStatus == null || paymentStatus.isBlank()) {
+                    paymentStatus = "PENDING";
+                }
+                ride.setPaymentStatus(paymentStatus);
+
                 history.add(ride);
             }
         }
         return history;
     }
 
+        // ---------------------------------------------------------
+    // 7. MARK PAYMENT AS PAID
     // ---------------------------------------------------------
-    // 7. DRIVER HISTORY
+    @PostMapping("/payments/markPaid")
+    public ResponseEntity<String> markPaymentAsPaid(@RequestBody PaymentStatusRequest request) {
+
+        if (request == null || request.getRideId() == null || request.getPassengerId() == null) {
+            return ResponseEntity.badRequest().body("Missing rideId or passengerId");
+        }
+
+        RideRequest rideRequest =
+                rideRequestRepository.findByRideIdAndPassengerId(request.getRideId(), request.getPassengerId());
+
+        if (rideRequest == null) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Ride request not found");
+        }
+
+        rideRequest.setPaymentStatus("PAID");
+        rideRequestRepository.save(rideRequest);
+
+        return ResponseEntity.ok("Payment marked as PAID");
+    }
+
+
+    // ---------------------------------------------------------
+    // 8. DRIVER HISTORY
     // ---------------------------------------------------------
     @GetMapping("/history/driver/{id}")
     public List<Ride> getDriverHistory(@PathVariable Long id) {
