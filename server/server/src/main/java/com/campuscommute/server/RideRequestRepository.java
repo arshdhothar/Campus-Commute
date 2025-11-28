@@ -10,4 +10,5 @@ public interface RideRequestRepository extends JpaRepository<RideRequest, Long> 
     List<RideRequest> findByRideId(Long rideId);
 
     List<RideRequest> findByPassengerId(Long passengerId);
+    RideRequest findByRideIdAndPassengerId(Long rideId, Long passengerId);
 }

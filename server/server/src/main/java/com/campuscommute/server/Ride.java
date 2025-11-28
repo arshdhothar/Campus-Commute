@@ -28,6 +28,14 @@ public class Ride {
     @Transient
     private double driverRating;
 
+    // Transient fields for payment info (per passenger)
+    @Transient
+    private Double splitFare;
+
+    @Transient
+    private String paymentStatus;
+
+
     @OneToMany(mappedBy = "ride", cascade = CascadeType.ALL)
     @JsonManagedReference
     private List<RideRequest> requests = new ArrayList<>();
@@ -50,6 +58,10 @@ public class Ride {
     
     public double getDriverRating() { return driverRating; }
 
+    public Double getSplitFare() { return splitFare; }
+    public String getPaymentStatus() { return paymentStatus; }
+
+
     // Setters
     public void setPassengerId(Long passengerId) { this.passengerId = passengerId; }
     public void setDriverId(Long driverId) { this.driverId = driverId; }
@@ -63,4 +75,8 @@ public class Ride {
     public void setRequests(List<RideRequest> requests) { this.requests = requests; }
     
     public void setDriverRating(double driverRating) { this.driverRating = driverRating; }
+
+    public void setSplitFare(Double splitFare) { this.splitFare = splitFare; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
 }

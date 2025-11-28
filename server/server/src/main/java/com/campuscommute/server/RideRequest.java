@@ -14,6 +14,8 @@ public class RideRequest {
     private String passengerName;
 
     private String status;
+    private String paymentStatus;
+
 
     @ManyToOne
     @JoinColumn(name = "ride_id")
@@ -26,7 +28,11 @@ public class RideRequest {
         this.passengerId = passengerId;
         this.passengerName = passengerName;
         this.status = "PENDING";
+        this.paymentStatus = "PENDING";
     }
+
+
+    
 
     // Getters
     public Long getId() { return id; }
@@ -34,10 +40,14 @@ public class RideRequest {
     public String getPassengerName() { return passengerName; }
     public String getStatus() { return status; }
     public Ride getRide() { return ride; }
+    public String getPaymentStatus() { return paymentStatus; }
+
 
     // Setters
     public void setPassengerId(Long passengerId) { this.passengerId = passengerId; }
     public void setPassengerName(String passengerName) { this.passengerName = passengerName; }
     public void setStatus(String status) { this.status = status; }
     public void setRide(Ride ride) { this.ride = ride; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
 }

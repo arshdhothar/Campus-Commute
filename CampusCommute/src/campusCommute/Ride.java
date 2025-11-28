@@ -21,6 +21,10 @@ public class Ride {
     private int availableSeats;
     private double price;
     private double driverRating; 
+    
+    // NEW for payment
+    private Double splitFare;
+    private String paymentStatus; // e.g., "PENDING" or "PAID"
 
     private List<RideRequest> requests;
 
@@ -60,6 +64,10 @@ public class Ride {
 
     // --- NEW GETTER ---
     public double getDriverRating() { return driverRating; }
+    
+    public Double getSplitFare() { return splitFare; }
+    public String getPaymentStatus() { return paymentStatus; }
+
 
     // -------------------------
     // SETTERS
@@ -86,6 +94,10 @@ public class Ride {
         if (this.requests == null) this.requests = new ArrayList<>();
         this.requests.add(request);
     }
+    
+    public void setSplitFare(Double splitFare) { this.splitFare = splitFare; }
+    public void setPaymentStatus(String paymentStatus) { this.paymentStatus = paymentStatus; }
+
 
     // -------------------------
     // User-friendly display text
