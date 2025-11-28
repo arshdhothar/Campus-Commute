@@ -245,7 +245,18 @@ public class PassengerGUI extends JFrame {
         // ---- BUTTONS AT BOTTOM ----
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
         buttonPanel.setOpaque(false);
-
+     // Map buttons
+        JButton startBtn = new JButton("Start Location");
+        JButton destBtn  = new JButton("Destination");
+        startBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        startBtn.setBackground(Color.WHITE);
+        startBtn.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));
+        startBtn.addActionListener(e -> openInMaps(r.getStartLocation()));
+        destBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
+        destBtn.setBackground(Color.WHITE);
+        destBtn.setBorder(BorderFactory.createLineBorder(Color.GRAY, 1, true));
+        destBtn.addActionListener(e -> openInMaps(r.getDestination()));
+        
         // Request Button
         JButton requestBtn = new JButton("Request Ride");
         requestBtn.setFont(new Font("Segoe UI", Font.PLAIN, 13));
@@ -263,7 +274,8 @@ public class PassengerGUI extends JFrame {
 
         buttonPanel.add(requestBtn);
         buttonPanel.add(chatBtn);
-
+        buttonPanel.add(startBtn);
+        buttonPanel.add(destBtn);
         card.add(buttonPanel, BorderLayout.SOUTH);
 
         return card;
@@ -412,4 +424,12 @@ public class PassengerGUI extends JFrame {
             }
         }
     }
+    private void openInMaps(String location) { 
+    	try { 
+    		String query = java.net.URLEncoder.encode(location, java.nio.charset.StandardCharsets.UTF_8);
+    		String url = "https://maps.google.com/?q=" + query; 
+    		Desktop.getDesktop().browse(new URI(url)); } 
+    	catch (Exception ex) { 
+    		JOptionPane.showMessageDialog(this, "Could not open browser."); } }
+    
 }
