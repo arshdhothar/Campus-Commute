@@ -49,15 +49,14 @@ ___
 ## Unassigned 📥
 
 ### User Story 6: Payment
-
-As a passenger I want to pay for my share of the ride within the app using a secure payment method, so that costs are instantly split among riders.
+As a passenger, I want to see my payment status for a ride and mark it as paid,
+so that I can confirm my part of the split fare.
 
 Acceptance Criteria:
-
-* The app integrates with a secure payment system.
-* The trip cost is automatically calculated and split equally among all passengers.
-* Passengers are automatically charged when the trip is done.
-* Drivers receive payment within 24 hours.
+Each ride shows a split fare amount for the passenger.
+A passenger can mark their payment as “Paid”.
+The backend stores the updated payment status.
+The driver can view which passengers have paid.
 
 ### User Story 11 - Carpool Scheduling (Recurring Rides)
 
