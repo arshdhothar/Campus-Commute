@@ -36,8 +36,7 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 ## Task Breakdown  
 
 ### **Ibrahim**  
-- Implement and test **User Story ---**.
-- Implement and test **User Story ---**.
+- Implement and test **User Story 6**.
 - Post minimum 3 standups. 
 - Complete sr2.md
 - Update CRC cards and System Design document after completion. 
