@@ -239,12 +239,17 @@ public class PassengerGUI extends JFrame {
 
         JLabel price = new JLabel("Price: $" + r.getPrice());
         price.setFont(new Font("Segoe UI", Font.PLAIN, 14));
-
-        JPanel info = new JPanel(new GridLayout(3, 1));
+        
+        //CARBOON FOOTPRINT LABEL
+        JLabel carbon = new JLabel("Estimated CO2 Saved: " + CarbonCalculator.getCarbon(r.getStartLocation(),r.getDestination()));
+        carbon.setFont(new Font("Segoe UI", Font.PLAIN, 14));
+        
+        JPanel info = new JPanel(new GridLayout(4, 1));
         info.setOpaque(false);
         info.add(title);
         info.add(time);
         info.add(price);
+        info.add(carbon);
 
         card.add(info, BorderLayout.CENTER);
 
