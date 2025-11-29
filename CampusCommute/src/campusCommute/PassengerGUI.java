@@ -148,12 +148,31 @@ public class PassengerGUI extends JFrame {
                 new ViewProfileGUI(CurrentUser.loggedInUser);
                 tabs.setSelectedIndex(0);
             }
+            else if (selectedIndex == 3) {
+                new WeatherGUI().setVisible(true);
+                tabs.setSelectedIndex(0);
+            }
         });
 
         setVisible(true);
+     // ---------------- TAB 4: WEATHER ----------------
+        JPanel weatherWrapper = new JPanel(new BorderLayout());
+        JButton openWeatherBtn = new JButton("Open Weather");
+        openWeatherBtn.setFont(new Font("Segoe UI", Font.BOLD, 16));
+
+        // center the button nicely
+        JPanel weatherCenter = new JPanel(new GridBagLayout());
+        weatherCenter.add(openWeatherBtn);
+        weatherWrapper.add(weatherCenter, BorderLayout.CENTER);
+
+        // add tab
+        tabs.addTab("Weather", weatherWrapper);
+
+        // action: open the weather window
+        openWeatherBtn.addActionListener(e -> new WeatherGUI().setVisible(true));
+
     }
-
-
+   
     // ================================================================
     // LOAD ALL RIDES
     // ================================================================
