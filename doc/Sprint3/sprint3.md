@@ -47,9 +47,10 @@ Complete full backend integration using **Java Spring Boot** and **MySQL**, conn
 ### **Alp**  
 - Update related CRC card after completing implementation.  
 - Post minimum 3 standups.  
-- Implement and test **User Story ---***.
-- Implement and test **User Story ---***.
-
+- Implement and test **User Story 12***.
+- Implement and test **User Story 19***.
+- Update PB.md
+- Update CRC cards and system design document
 ---
 
 ### **Arsh**  
