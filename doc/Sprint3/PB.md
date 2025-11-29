@@ -70,17 +70,6 @@ Acceptance Criteria:
 * System auto-generates rides on selected days.
 * Riders can view and join recurring rides as usual.
 
-### User Story 12 - Carbon Footprint Tracker
-
-As a student,
-
-I want to see how much CO₂ I’ve saved by carpooling so that I can feel motivated to ride sustainably.
-
-Acceptance Criteria:
-
-* The system calculates CO₂ saved per ride.
-* Displays total CO₂ saved on user profile dashboard.
-* Updates dynamically with every new ride joined or hosted.
 
 ### User Story 18 - Reward & Points System
 
@@ -95,17 +84,7 @@ Acceptance Criteria:
 * Points can be used for app perks (e.g., priority booking, badges).
 * Points reset or carry over according to policy defined by the team.
 
-### User Story 19 -Weather Aware Ride Alerts
 
-As a user,
-
-I want to receive alerts about bad weather conditions that may affect my ride so that I can plan ahead or cancel safely.
-
-Acceptance Criteria:
-
-* App fetches weather data for the route at departure time.
-* If conditions like heavy rain or snow are detected, send an in-app notification.
-* Drivers and riders can choose to confirm or reschedule the trip.
 
 ___
 
@@ -232,3 +211,31 @@ Acceptance Criteria:
 * Map view available for all ride posts.
 * Directions to the destination and starting locations.
 * Integration with Google Maps API or equivalent.
+
+  ### User Story 12 - Carbon Footprint Tracker (Alp)
+
+As a student,
+
+I want to see how much CO₂ I’ve saved by carpooling so that I can feel motivated to ride sustainably.
+
+Acceptance Criteria:
+
+* The system calculates CO₂ saved per ride.
+* Displays total CO₂ on the ride cards
+
+### User Story 19 -Weather Viewing (Alp)
+
+As a user,
+
+I want to receive alerts about bad weather conditions that may affect my ride so that I can plan ahead or cancel safely.
+
+Acceptance Criteria:
+
+As a user,
+
+I want to view the weather as a passenger. Both future and current forecast
+
+Acceptance Criteria:
+
+* An view of the current view in a given city
+* A way to access to weather data for the upcoming days
