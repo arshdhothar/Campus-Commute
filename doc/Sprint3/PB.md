@@ -48,15 +48,6 @@ ___
 
 ## Unassigned 📥
 
-### User Story 6: Payment
-As a passenger, I want to see my payment status for a ride and mark it as paid,
-so that I can confirm my part of the split fare.
-
-Acceptance Criteria:
-Each ride shows a split fare amount for the passenger.
-A passenger can mark their payment as “Paid”.
-The backend stores the updated payment status.
-The driver can view which passengers have paid.
 
 ### User Story 11 - Carpool Scheduling (Recurring Rides)
 
@@ -239,3 +230,13 @@ Acceptance Criteria:
 
 * An view of the current view in a given city
 * A way to access to weather data for the upcoming days
+
+### User Story 6: Payment (Ibrahim)
+As a passenger, I want to see my payment status for a ride and mark it as paid,
+so that I can confirm my part of the split fare.
+
+Acceptance Criteria:
+Each ride shows a split fare amount for the passenger.
+A passenger can mark their payment as “Paid”.
+The backend stores the updated payment status.
+The driver can view which passengers have paid.
