@@ -184,6 +184,8 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 - RideRequest
 - Passenger
 - RideService
+- WeatherGUI
+- CarbonCalculator
 
 
 ---
@@ -580,6 +582,60 @@ All data is stored locally in text files, so the system does not depend on an ex
 - RatingRepository
 
 ---
+
+## **Class Name:** CarbonCalculator
+**Parent Class:** None  
+**Subclasses:** None  
+
+### **Responsibilities**
+- This class calculates is responsible to calculate the carbon emission given a start and destination
+- Uses googles matrix api
+  
+
+### **Collaborators**
+- GSON
+---
+
+## **Class Name:** WeatherInfo
+**Parent Class:** None  
+**Subclasses:** None  
+
+### **Responsibilities**
+- Store weather data in a class
+- Ensure aall data is in a string format
+  
+### **Collaborators**
+- GSON
+- WeatherAPI
+---
+
+## **Class Name:** WeatherAPI
+**Parent Class:** None  
+**Subclasses:** None  
+
+### **Responsibilities**
+- Retrieve all data to be stored in a weatherInfo object
+- Ensure data formatting
+  
+### **Collaborators**
+- GSON
+- WeatherInfo
+
+---
+
+## **Class Name:** WeatherGUI
+**Parent Class:** None  
+**Subclasses:** None  
+
+### **Responsibilities**
+- Display all the data stored in weatherInfo in passengerGUI
+- Allow users to view future weather using WeatherNetwork
+  
+### **Collaborators**
+- GSON
+- WeatherInfo
+- WeatherAPI
+- PassengerGUI
 
 ## 5. System Architecture Diagram
 
