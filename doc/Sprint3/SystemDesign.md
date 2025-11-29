@@ -471,19 +471,7 @@ Backend:
 - `EmergencyButtonPanel`  
 
  ---
-## 4. System Interaction and Environment
-
-The Campus Commute system is a desktop application developed in **Java SE 21** using **Swing** for the user interface.  
-It runs on any operating system that supports the Java Virtual Machine (JVM).  
-All data is stored locally in text files, so the system does not depend on an external database or internet connection.  
-
-**Assumptions:**  
-- The user has Java installed on their computer.  
-- The system has permission to read and write local files.  
-- Only one user instance runs at a time.
-
----
-
+ 
 ### **Class Name:** Person
 **Parent Class:** None
 **Subclasses:** None
@@ -636,6 +624,19 @@ All data is stored locally in text files, so the system does not depend on an ex
 - WeatherInfo
 - WeatherAPI
 - PassengerGUI
+
+## 4. System Interaction and Environment
+
+The Campus Commute system is a desktop application developed in **Java SE 21** using **Swing** for the user interface.  
+It runs on any operating system that supports the Java Virtual Machine (JVM).  
+All data is stored locally in text files, so the system does not depend on an external database or internet connection.  
+
+**Assumptions:**  
+- The user has Java installed on their computer.  
+- The system has permission to read and write local files.  
+- Only one user instance runs at a time.
+
+---
 
 ## 5. System Architecture Diagram
 
