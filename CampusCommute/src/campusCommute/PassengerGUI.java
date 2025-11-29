@@ -170,8 +170,12 @@ public class PassengerGUI extends JFrame {
 
         // action: open the weather window
         openWeatherBtn.addActionListener(e -> new WeatherGUI().setVisible(true));
-
+        
+        // ---------------- TAB 5: LOST & FOUND ----------------
+        tabs.addTab("Lost & Found", new LostAndFoundPanel());
     }
+    
+    
    
     // ================================================================
     // LOAD ALL RIDES
