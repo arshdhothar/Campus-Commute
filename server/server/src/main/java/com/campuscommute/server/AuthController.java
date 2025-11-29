@@ -3,15 +3,20 @@ package com.campuscommute.server;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
+import java.util.List;
 
 @RestController
 public class AuthController {
 
     @Autowired
     private PersonRepository personRepository;
+
+    @Autowired
+    private LostItemRepository lostItemRepository;
 
     @PostMapping("/api/signup")
     public void signUp(@RequestBody Person person) {
@@ -89,5 +94,24 @@ public class AuthController {
         // 5. Send a "200 OK" success message back to the GUI
         System.out.println("SUCCESS: Updated emergency contact for: " + person.getEmail());
         return ResponseEntity.ok("Contact info updated successfully!");
+    }
+
+    @PostMapping("/api/reportLostItem")
+    public ResponseEntity<String> reportLostItem(@RequestBody LostItemReport report) {
+        // Ensure status is set
+        if (report.getStatus() == null) {
+            report.setStatus("Open");
+        }
+
+        // Save to database
+        lostItemRepository.save(report);
+
+        System.out.println("SUCCESS: Lost item reported by: " + report.getUserEmail());
+        return ResponseEntity.ok("Report submitted successfully. ID: " + report.getId());
+    }
+
+    @GetMapping("/api/lostItems")
+    public List<LostItemReport> getAllLostItems() {
+        return lostItemRepository.findAll();
     }
 }
