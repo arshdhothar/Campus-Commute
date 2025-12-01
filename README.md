@@ -29,6 +29,18 @@ Many students and staff rely on public transportation or expensive alternatives 
 
 ---
 
+## Architecture & Stack
+
+Our system follows the **Three-Tiered Architecture** pattern, ensuring a clear separation between the client, server, and data layers.
+
+| Layer | Technology (Used) |
+| :--- | :--- |
+| **Frontend (View)** | Java Swing (`javax.swing`) |
+| **Backend (Controller)** | Java Spring Boot (REST API) |
+| **Database (Model)** | MySQL Community Server |
+| **Communication** | HTTP / JSON (via GSON library) |
+| **Version Control & DevOps** | GitHub, Trello, Discord, GitHub Desktop |
+
 ## **Installation for Your Software/System**
 
 To run our project, you need:  
