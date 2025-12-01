@@ -2,7 +2,7 @@
 ### [Trello link](https://trello.com/invite/b/68cde0f68b3f22f748c81e76/ATTI2b6976d1181f719eed88d3385e4290c2793E2F0B/my-trello-board)
 
 ## In Progress 🔄️
-### User Story 4: Ratings and Feedback System
+### User Story 4: Ratings and Feedback System (Arsh)
 
 As a passenger or driver, I want to rate and review my ride experience after each trip,
 so that future users can make informed choices and maintain a culture of safety and respect.
@@ -14,7 +14,7 @@ Acceptance Criteria:
 * Average ratings are displayed on user profiles.
 * Admins can review and act on low rated or reported rides.
 
-### User Story 5: In-App Chat & Notifications
+### User Story 5: In-App Chat & Notifications (Zack)
 
 As a driver I want to send short messages about the ride so passengers will be prepared for pickup. As a passenger I want to receive notifications and updates on my ride so I can stay informed of any changes.
 
@@ -23,6 +23,58 @@ Acceptance Criteria:
 * An in-app chat is available between matched drivers and passengers.
 * Users receive notifications for new messages, ride requests, and confirmations.
 * Drivers can notify all passengers of delays or route changes.
+
+### User Story 16 - Lost & Found Reporting (Sahil)
+
+As a rider or driver, I want to report lost items after a trip so that they can be returned to the rightful owner.
+
+Acceptance Criteria:
+
+* Post-ride “Report Lost Item” option available.
+* Reports include ride details, contact method, and item description.
+* Notifications sent to the other participant (driver/rider).
+
+  ### User Story 12 - Carbon Footprint Tracker (Alp)
+
+As a student,
+
+I want to see how much CO₂ I’ve saved by carpooling so that I can feel motivated to ride sustainably.
+
+Acceptance Criteria:
+
+* The system calculates CO₂ saved per ride.
+* Displays total CO₂ on the ride cards
+
+### User Story 19 -Weather Viewing (Alp)
+
+As a user,
+
+I want to receive alerts about bad weather conditions that may affect my ride so that I can plan ahead or cancel safely.
+
+Acceptance Criteria:
+
+As a user,
+
+I want to view the weather as a passenger. Both future and current forecast
+
+Acceptance Criteria:
+
+* An view of the current view in a given city
+* A way to access to weather data for the upcoming days
+
+### User Story 6: Payment (Ibrahim)
+As a passenger, I want to see my payment status for a ride and mark it as paid,
+so that I can confirm my part of the split fare.
+
+Acceptance Criteria:
+Each ride shows a split fare amount for the passenger.
+A passenger can mark their payment as “Paid”.
+The backend stores the updated payment status.
+The driver can view which passengers have paid.
+
+___
+
+## Unassigned 📥
 
 ### User Story 14 - Ride Cancellation Policy
 
@@ -33,21 +85,6 @@ Acceptance Criteria:
 * Riders can cancel up to X hours before ride time.
 * Cancellation notifies the driver immediately.
 * Repeated last-minute cancellations trigger a warning.
-
-### User Story 16 - Lost & Found Reporting
-
-As a rider or driver, I want to report lost items after a trip so that they can be returned to the rightful owner.
-
-Acceptance Criteria:
-
-* Post-ride “Report Lost Item” option available.
-* Reports include ride details, contact method, and item description.
-* Notifications sent to the other participant (driver/rider).
-
-___
-
-## Unassigned 📥
-
 
 ### User Story 11 - Carpool Scheduling (Recurring Rides)
 
@@ -202,41 +239,3 @@ Acceptance Criteria:
 * Map view available for all ride posts.
 * Directions to the destination and starting locations.
 * Integration with Google Maps API or equivalent.
-
-  ### User Story 12 - Carbon Footprint Tracker (Alp)
-
-As a student,
-
-I want to see how much CO₂ I’ve saved by carpooling so that I can feel motivated to ride sustainably.
-
-Acceptance Criteria:
-
-* The system calculates CO₂ saved per ride.
-* Displays total CO₂ on the ride cards
-
-### User Story 19 -Weather Viewing (Alp)
-
-As a user,
-
-I want to receive alerts about bad weather conditions that may affect my ride so that I can plan ahead or cancel safely.
-
-Acceptance Criteria:
-
-As a user,
-
-I want to view the weather as a passenger. Both future and current forecast
-
-Acceptance Criteria:
-
-* An view of the current view in a given city
-* A way to access to weather data for the upcoming days
-
-### User Story 6: Payment (Ibrahim)
-As a passenger, I want to see my payment status for a ride and mark it as paid,
-so that I can confirm my part of the split fare.
-
-Acceptance Criteria:
-Each ride shows a split fare amount for the passenger.
-A passenger can mark their payment as “Paid”.
-The backend stores the updated payment status.
-The driver can view which passengers have paid.
