@@ -62,17 +62,7 @@ Acceptance Criteria:
 * An view of the current view in a given city
 * A way to access to weather data for the upcoming days
 
-### User Story 6: Payment (Ibrahim)
-As a passenger, I want to see my payment status for a ride and mark it as paid,
-so that I can confirm my part of the split fare.
 
-Acceptance Criteria:
-Each ride shows a split fare amount for the passenger.
-A passenger can mark their payment as “Paid”.
-The backend stores the updated payment status.
-The driver can view which passengers have paid.
-
-___
 
 ## Unassigned 📥
 
@@ -239,3 +229,16 @@ Acceptance Criteria:
 * Map view available for all ride posts.
 * Directions to the destination and starting locations.
 * Integration with Google Maps API or equivalent.
+
+
+### User Story 6: Payment (Ibrahim)
+As a passenger, I want to see my payment status for a ride and mark it as paid,
+so that I can confirm my part of the split fare.
+
+Acceptance Criteria:
+Each ride shows a split fare amount for the passenger.
+A passenger can mark their payment as “Paid”.
+The backend stores the updated payment status.
+The driver can view which passengers have paid.
+
+___
