@@ -1,6 +1,6 @@
 ![Logo](https://i.imgur.com/7YiWyhJ.png)
 
-Discord Link : https://discord.gg/vv76pXYrdj
+Discord Link (for Sprint 2 and Sprint 3 standups - Visit the sprint2 and sprint3 standup channels) : https://discord.gg/vv76pXYrdj
 
 Project Demo Video - Sprint3: https://www.youtube.com/watch?v=ovT_k52Pb-U
 
