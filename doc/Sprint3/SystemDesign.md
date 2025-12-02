@@ -58,7 +58,43 @@ The system’s design encourages eco-friendly travel and sets the stage for late
 
 ## 3. Class Responsibilities and Collaborators (CRC Cards)
 
+
+### **Class Name:** LostAndFoundPanel
+**Parent Class:** JPanel
+**Subclasses:** None
+
+**Responsibilities:**
+- Render the form UI for reporting lost items (labels, fields, buttons).
+- Validate user inputs (ensure description and driver info are not empty).
+- Retrieve the active user's email and phone from the `CurrentUser` session.
+- Instantiate `LostItemReport` objects with form data.
+- Serialize report data to JSON using `Gson`.
+- Execute HTTP POST requests to the backend `/api/reportLostItem` endpoint.
+- Display success or error feedback via `JOptionPane`.
+
+**Collaborators:**
+- PassengerGUI (Container)
+- CurrentUser
+- LostItemReport
+- Gson
+- AuthController (Backend API)
+
 ---
+
+### **Class Name:** LostItemReport
+**Parent Class:** Object
+**Subclasses:** None
+
+**Responsibilities:**
+- Represent a single lost item report.
+- Store report details including user email, item description, preferred contact, and driver info.
+- Provide structure for `Gson` to generate the correct JSON payload.
+- Map to the `lost_item_report` database table (Server-side).
+
+**Collaborators:**
+- LostAndFoundPanel (Frontend Creator)
+- AuthController (Backend Receiver)
+- LostItemRepository (Backend Database Access)
 
 ### **Class Name:** EmergencyContanctInfoFrame
 **Parent Class:** JFrame
